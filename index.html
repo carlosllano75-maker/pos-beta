@@ -3,362 +3,173 @@
 <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> 
-  <title>Casa Gourmet POS Pro</title>
+  <title>Ferretería POS Beta</title>
   
-  <meta name="theme-color" content="#d4af37">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-  <link rel="icon" href="logo-casa-gourmet.jpg">
-  <link rel="apple-touch-icon" href="logo-casa-gourmet.jpg">
-  <link rel="manifest" href="manifest.json">
-
+  <meta name="theme-color" content="#2c3e50"> <link rel="manifest" href="manifest.json">
   <script src="html2canvas.min.js"></script>
 
   <style> 
-    body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding-bottom:50px;user-select:none;} 
-    header{background:#111;padding:20px 10px;text-align:center;border-bottom:2px solid #d4af37} 
-    .logo{max-height:80px;filter: drop-shadow(0 0 5px rgba(212,175,55,0.3))} 
-    .grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;padding:15px} 
-    .card{background:#1a1a1a;border-radius:15px;padding:15px;text-align:center;border:1px solid #333;box-shadow: 0 4px 6px rgba(0,0,0,0.3)} 
-    .card:active{transform: scale(0.98);background:#222}
-    button{padding:12px 18px;border:none;border-radius:10px;background:#d4af37;color:#000;font-weight:bold;margin:5px;cursor:pointer;transition:0.2s} 
-    button:active{opacity:0.7}
-    .btn-danger{background:#ff4444 !important;color:#fff;padding:5px 10px}
-    .lista{background:#111;padding:15px;border-radius:15px;margin:15px;border-left:4px solid #d4af37} 
-    select, input{padding:12px;border-radius:10px;margin:8px 0;background:#222;color:#fff;border:1px solid #444;width:80%;max-width:300px}
-    h3{color:#d4af37;margin-top:20px}
-    #app{padding:10px;text-align:center}
-    .item-pedido{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px dashed #333;padding-bottom:5px}
-    .backup-box{background:#222; padding:15px; border-radius:15px; margin:15px auto; max-width:400px; border:1px dashed #444}
+    body{font-family:'Segoe UI',Arial; background:#f4f7f6; color:#333; margin:0; padding-bottom:50px;} 
+    header{background:#2c3e50; padding:15px; text-align:center; color:white; border-bottom:4px solid #e67e22} 
+    .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; padding:10px} 
+    .card{background:white; border-radius:8px; padding:12px; text-align:center; border:1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1)} 
+    button{padding:10px; border:none; border-radius:5px; background:#e67e22; color:white; font-weight:bold; cursor:pointer;} 
+    .btn-venta{background:#27ae60; width:90%; margin:10px auto; display:block; font-size:1.1em}
+    .lista{background:white; padding:15px; border-radius:8px; margin:10px; border:1px solid #ddd} 
+    .item-pedido{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; border-bottom:1px solid #eee; padding:5px 0}
+    input, select{padding:10px; border-radius:5px; border:1px solid #ccc; width:80%; margin:5px}
+    #app{padding:10px;}
+    .badge{background:#2c3e50; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em}
     
-    #ticket-wrapper { 
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0,0,0,0.9); z-index: 10000; display: none;
-      justify-content: center; align-items: center;
-    }
-    .ticket-termico {
-      width: 300px; background: white; color: black; padding: 20px;
-      font-family: 'Courier New', Courier, monospace; text-align: center;
-    }
-    .sep { border-top: 1px dashed #000; margin: 10px 0; }
-
-    #bloqueo {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #0b0b0b; z-index: 9999; display: flex;
-      flex-direction: column; align-items: center; justify-content: center;
-    }
+    /* Estilo del Ticket */
+    #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;}
+    .ticket-termico { width:280px; background:white; color:black; padding:15px; font-family:monospace; font-size:12px; }
   </style> 
 </head> 
 <body> 
 
   <div id="ticket-wrapper">
     <div id="ticket-visual" class="ticket-termico">
-      <img src="logo-casa-gourmet.jpg" style="width: 180px; margin-bottom: 10px;"><br>
-      <b style="font-size: 18px;">CASA GOURMET</b><br>
-      <small id="t-fecha"></small><br>
-      <div class="sep"></div>
-      <div id="t-items" style="text-align:left; font-size:14px"></div>
-      <div class="sep"></div>
-      <b id="t-total" style="font-size:22px"></b><br><br>
-      <small>¡Gracias por su compra!</small>
-    </div>
-    <div id="ticket-reporte" class="ticket-termico" style="display:none">
-      <img src="logo-casa-gourmet.jpg" style="width: 120px;"><br>
-      <b>REPORTE DE CIERRE</b><br>
-      <small id="r-fecha"></small>
-      <div class="sep"></div>
-      <div id="r-items" style="text-align:left; font-size:12px"></div>
-      <div class="sep"></div>
-      <b id="r-total" style="font-size:20px"></b><br>
-      <small id="r-cantidad"></small>
+      <h3 style="margin:0">FERRETERÍA BETA</h3>
+      <p id="t-fecha"></p>
+      <hr>
+      <div id="t-items"></div>
+      <hr>
+      <h2 id="t-total" style="text-align:right"></h2>
+      <p style="text-align:center">¡Gracias por su confianza!</p>
     </div>
   </div>
 
-  <div id="bloqueo">
-    <img src="logo-casa-gourmet.jpg" style="width:120px; border-radius:50%; margin-bottom:20px">
-    <h2 style="color:#d4af37">SISTEMA PROTEGIDO</h2>
-    <input type="password" id="passInput" placeholder="Clave de acceso" style="text-align:center"><br>
-    <button onclick="validarLicencia()">Activar Sistema</button>
+  <header> 
+    <b>🛠️ FERRE SISTEMA PRO (BETA)</b> 
+  </header> 
+  
+  <div style="text-align:center; background:#ecf0f1; padding:10px">
+    <button onclick="verInventario()">📦 Productos</button>
+    <button onclick="nuevaVenta()" style="background:#27ae60">➕ Nueva Venta</button>
+    <button onclick="verConfig()">⚙️ Ajustes</button>
   </div>
 
-  <div id="contenido-app" style="display:none">
-    <header> 
-      <img src="logo-casa-gourmet.jpg" class="logo"><br> 
-      <b>CASA GOURMET POS PRO</b> 
-    </header> 
-    
-    <div style="text-align:center;padding:15px;background:#161616"> 
-      <button onclick="verMesas()">🍽️ Mesas</button> 
-      <button onclick="config()" style="background:#444;color:#fff">⚙️ Ajustes</button> 
-    </div> 
-    
-    <div id="app"></div> 
-  </div>
+  <div id="app"></div> 
 
   <script> 
-    const CLAVE_MAESTRA = "GOURMET2024";
+    let productos = JSON.parse(localStorage.getItem("ferre_prods") || "[]");
+    let carrito = [];
+    let ventasTotales = parseFloat(localStorage.getItem("ferre_ventas") || "0");
 
-    let menu=JSON.parse(localStorage.getItem("menu")||"[]"); 
-    let pedidos=JSON.parse(localStorage.getItem("pedidos")||"{}"); 
-    let categorias=JSON.parse(localStorage.getItem("categorias")||"[]"); 
-    let ventasDia=parseFloat(localStorage.getItem("ventasDia")||"0");
-    let listaMesas=JSON.parse(localStorage.getItem("listaMesas")||"[1,2,3,4,5,6,7,8,9,10,11,12]");
-    let historialVentas=JSON.parse(localStorage.getItem("historialVentas")||"[]");
-
-    function guardar(){
-      localStorage.setItem("menu",JSON.stringify(menu));
-      localStorage.setItem("pedidos",JSON.stringify(pedidos));
-      localStorage.setItem("categorias",JSON.stringify(categorias));
-      localStorage.setItem("ventasDia",ventasDia.toString());
-      localStorage.setItem("listaMesas",JSON.stringify(listaMesas));
-      localStorage.setItem("historialVentas",JSON.stringify(historialVentas));
+    function guardar() {
+      localStorage.setItem("ferre_prods", JSON.stringify(productos));
+      localStorage.setItem("ferre_ventas", ventasTotales.toString());
     }
 
-    function validarLicencia() {
-      if(document.getElementById("passInput").value === CLAVE_MAESTRA) {
-        localStorage.setItem("licencia_activa", "true");
-        chequearAcceso();
-      } else { alert("Clave incorrecta"); }
-    }
-
-    function chequearAcceso() {
-      if(localStorage.getItem("licencia_activa") === "true") {
-        document.getElementById("bloqueo").style.display = "none";
-        document.getElementById("contenido-app").style.display = "block";
-        verMesas();
-      }
-    }
-
-    function verMesas(){ 
-      let html="<div style='margin-bottom:10px'><button onclick='agregarNuevaMesa()' style='background:#28a745; color:white; width:90%'>+ Nueva Mesa / Barra</button></div>";
-      html+="<div class='grid'>"; 
-      listaMesas.forEach(i => { 
-        let total=0; if(pedidos[i]) pedidos[i].forEach(p=>total+=p.precio); 
-        let colorMesa = total > 0 ? "border:1px solid #d4af37; background:#252115" : "";
-        html+=`<div class='card' style='${colorMesa}'><b>Mesa ${i}</b><br><span style='color:${total>0?"#0f0":"#666"}'>$${total}</span> 
-        <br><button onclick='abrirMesa("${i}")'>${total>0?"Editar":"Abrir"}</button></div>`; 
-      }); 
-      html+="</div>"; document.getElementById("app").innerHTML=html; 
-    } 
-
-    function config(){ 
-      let html="<h3>Ajustes de Sistema</h3>";
-      html+=`<div class="backup-box" style="border-color:#d4af37">
-        <small style="color:#d4af37">VENTAS ACUMULADAS</small><br>
-        <b style="font-size:24px">$${ventasDia}</b><br>
-        <button onclick="imprimirReporte()" style="background:#28a745; color:white; margin-top:10px">🖨️ Reporte del Día</button>
-        <br><button onclick="reiniciarCaja()" style="background:#222; color:#ff4444; font-size:11px; margin-top:10px">Limpiar Todo</button>
-      </div>`;
-      html+="<button onclick='verHistorial()'>🕒 Ver Historial</button>";
-      html+="<br><button onclick='nuevoProducto()'>+ Nuevo Producto</button>";
-      html+=" <button onclick='configCategorias()'>📂 Categorías</button>";
-      html+=" <button onclick='configMesas()'>🍽️ Editar Mesas</button>";
-      html += `<div class="backup-box"><button onclick="exportarMenu()">📤 Exportar</button> <button onclick="importarMenu()">📥 Importar</button></div>`;
-      document.getElementById("app").innerHTML=html; 
-    }
-
-    function pagarMesa(m){
-      if(!pedidos[m] || pedidos[m].length === 0) return;
-      if(confirm("¿Cobrar e imprimir ticket?")){
-        let totalMesa = 0;
-        let itemsHTML = "";
-        let textoDetalles = "";
-        pedidos[m].forEach(p => {
-          totalMesa += p.precio;
-          itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${p.nombre}</span><span>$${p.precio}</span></div>`;
-          textoDetalles += p.nombre + ", ";
-        });
-
-        historialVentas.push({
-          hora: new Date().toLocaleTimeString(),
-          mesa: m,
-          total: totalMesa,
-          detalles: textoDetalles.slice(0, -2)
-        });
-
-        document.getElementById("t-fecha").innerText = new Date().toLocaleString();
-        document.getElementById("t-items").innerHTML = itemsHTML;
-        document.getElementById("t-total").innerText = "TOTAL: $" + totalMesa;
-
-        const wrapper = document.getElementById("ticket-wrapper");
-        document.getElementById("ticket-visual").style.display = "block";
-        document.getElementById("ticket-reporte").style.display = "none";
-        wrapper.style.display = "flex";
-
-        if (typeof html2canvas !== 'undefined') {
-          setTimeout(() => {
-            html2canvas(document.getElementById("ticket-visual"), { scale: 2 }).then(canvas => {
-                let link = document.createElement('a');
-                link.download = 'Ticket-' + m + '.png';
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-                wrapper.style.display = "none";
-                cerrarMesa(m, totalMesa);
-            }).catch(() => { wrapper.style.display = "none"; cerrarMesa(m, totalMesa); });
-          }, 500);
-        } else {
-          alert("Librería de impresión no encontrada. Cobrando sin ticket...");
-          wrapper.style.display = "none";
-          cerrarMesa(m, totalMesa);
-        }
-      }
-    }
-
-    function imprimirReporte() {
-      if(historialVentas.length === 0) return alert("Sin ventas hoy.");
-      let itemsHTML = "";
-      historialVentas.forEach(v => {
-        itemsHTML += `<div style="font-size:11px; border-bottom:1px solid #ddd; padding:5px 0">
-          <b>${v.hora} - Mesa ${v.mesa}</b><br>${v.detalles}<br><b>$${v.total}</b>
-        </div>`;
+    // --- VISTA: INVENTARIO ---
+    function verInventario() {
+      let html = "<h3>Inventario / Precios</h3>";
+      html += "<button onclick='agregarProducto()'>+ Agregar Producto</button><br><br>";
+      html += "<div class='grid'>";
+      productos.forEach((p, i) => {
+        html += `<div class='card'><b>${p.nombre}</b><br>
+                <span class='badge'>${p.cat}</span><br>
+                <b>$${p.precio}</b><br>
+                <button onclick='eliminarProd(${i})' style='background:#c0392b; margin-top:5px'>🗑️</button></div>`;
       });
+      html += "</div>";
+      document.getElementById("app").innerHTML = html;
+    }
 
-      document.getElementById("r-fecha").innerText = new Date().toLocaleString();
-      document.getElementById("r-items").innerHTML = itemsHTML;
-      document.getElementById("r-total").innerText = "TOTAL DÍA: $" + ventasDia;
-      document.getElementById("r-cantidad").innerText = "Ventas: " + historialVentas.length;
+    function agregarProducto() {
+      let n = prompt("Nombre del material:");
+      let pr = prompt("Precio de venta:");
+      let c = prompt("Categoría (Ej: Plomería, Eléctrico, Herramientas):");
+      if(n && pr) {
+        productos.push({nombre: n, precio: parseFloat(pr), cat: c});
+        guardar();
+        verInventario();
+      }
+    }
 
-      const wrapper = document.getElementById("ticket-wrapper");
-      document.getElementById("ticket-visual").style.display = "none";
-      document.getElementById("ticket-reporte").style.display = "block";
-      wrapper.style.display = "flex";
+    function eliminarProd(i) { if(confirm("¿Eliminar producto?")) { productos.splice(i, 1); guardar(); verInventario(); } }
+
+    // --- VISTA: VENTA ---
+    function nuevaVenta() {
+      let html = "<h3>Nueva Venta</h3>";
+      html += "<div class='grid'>";
+      productos.forEach(p => {
+        html += `<div class='card' onclick='alCarrito("${p.nombre}", ${p.precio})'>
+                  <b>${p.nombre}</b><br>$${p.precio}
+                </div>`;
+      });
+      html += "</div>";
+      html += "<div class='lista' id='lista-carrito'></div>";
+      document.getElementById("app").innerHTML = html;
+      actualizarCarrito();
+    }
+
+    function alCarrito(n, pr) {
+      carrito.push({nombre: n, precio: pr});
+      actualizarCarrito();
+    }
+
+    function actualizarCarrito() {
+      let html = "<b>Detalle de Venta:</b><br>";
+      let total = 0;
+      carrito.forEach((item, i) => {
+        total += item.precio;
+        html += `<div class='item-pedido'><span>${item.nombre}</span> 
+                <span>$${item.precio} <button onclick='quitar(${i})' style='background:red; padding:2px 5px'>x</button></span></div>`;
+      });
+      html += `<h4>TOTAL: $${total}</h4>`;
+      if(carrito.length > 0) html += `<button class='btn-venta' onclick='finalizarVenta(${total})'>💰 FINALIZAR Y TICKET</button>`;
+      document.getElementById("lista-carrito").innerHTML = html;
+    }
+
+    function quitar(i) { carrito.splice(i, 1); actualizarCarrito(); }
+
+    function finalizarVenta(total) {
+      if(!confirm("¿Confirmar venta de $" + total + "?")) return;
+      
+      // Preparar Ticket
+      document.getElementById("t-fecha").innerText = new Date().toLocaleString();
+      let itemsHTML = "";
+      carrito.forEach(item => {
+        itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${item.nombre}</span><span>$${item.precio}</span></div>`;
+      });
+      document.getElementById("t-items").innerHTML = itemsHTML;
+      document.getElementById("t-total").innerText = "TOTAL: $" + total;
+
+      document.getElementById("ticket-wrapper").style.display = "flex";
 
       setTimeout(() => {
-        html2canvas(document.getElementById("ticket-reporte"), {scale: 2}).then(canvas => {
+        html2canvas(document.getElementById("ticket-visual")).then(canvas => {
           let link = document.createElement('a');
-          link.download = 'CIERRE-' + new Date().toLocaleDateString() + '.png';
-          link.href = canvas.toDataURL("image/png");
+          link.download = 'Ticket_Ferreteria.png';
+          link.href = canvas.toDataURL();
           link.click();
-          wrapper.style.display = "none";
+          
+          ventasTotales += total;
+          carrito = [];
+          guardar();
+          document.getElementById("ticket-wrapper").style.display = "none";
+          nuevaVenta();
+          alert("Venta registrada con éxito");
         });
       }, 500);
     }
 
-    function cerrarMesa(m, total){
-        ventasDia += total;
-        delete pedidos[m];
-        guardar();
-        verMesas();
+    function verConfig() {
+      document.getElementById("app").innerHTML = `<h3>Ajustes</h3>
+      <div class='card'><h4>Ventas del día: $${ventasTotales}</h4>
+      <button onclick='localStorage.clear(); location.reload();' style='background:red'>Reiniciar Todo</button></div>`;
     }
 
-    function abrirMesa(m){ 
-      let html=`<h3>Mesa ${m}</h3>`; 
-      let cats = [...new Set(menu.map(p=>p.categoria))];
-      html+=`<select onchange='filtrarCategoria("${m}",this.value)' style='width:90%'><option value="">Todo</option>`;
-      cats.forEach(cat=>{ html+=`<option value="${cat}">${cat}</option>`; });
-      html+="</select><div id='productos-container'>"+mostrarProductos(m,"")+"</div>"; 
-      html+=mostrarLista(m); 
-      html+=`<br><button onclick='enviarWhatsApp("${m}")' style='background:#25D366; color:white; width:90%'>📱 WhatsApp</button>`;
-      html+=`<br><button onclick='pagarMesa("${m}")' style='background:#28a745; color:white; width:90%; margin-top:10px'>💰 Cobrar</button>`;
-      html+=`<br><button onclick='verMesas()' style='background:#444; color:white; margin-top:10px'>⬅️ Volver</button>`; 
-      document.getElementById("app").innerHTML=html; 
-    } 
+    verInventario();
 
-    function filtrarCategoria(m,cat){ document.getElementById('productos-container').innerHTML = mostrarProductos(m,cat); }
-    function mostrarProductos(m,cat){ 
-      let html="<div class='grid'>"; 
-      menu.filter(p=>!cat || p.categoria===cat).forEach(p=>{
-        html+=`<div class='card' style='padding:10px'>${p.nombre}<br><b>$${p.precio}</b><br><button onclick='agregar("${m}","${p.nombre}",${p.precio})'>➕</button></div>`; 
-      }); 
-      return html + "</div>"; 
-    } 
-    function agregar(m,n,pr){ if(!pedidos[m]) pedidos[m]=[]; pedidos[m].push({nombre:n,precio:pr}); guardar(); abrirMesa(m); }
-    function mostrarLista(m){ 
-      let html="<div class='lista'><b>📝 Pedido:</b><br>"; let total=0; 
-      if(pedidos[m]){ pedidos[m].forEach((p,i)=>{ total+=p.precio; html+=`<div class='item-pedido'><span>${p.nombre}</span> <span>$${p.precio} <button class='btn-danger' onclick='eliminarItem("${m}",${i})'>x</button></span></div>`; }); }
-      return html + `<br><b>TOTAL: $${total}</b></div>`; 
-    }
-    function eliminarItem(m,i){ pedidos[m].splice(i,1); guardar(); abrirMesa(m); }
-
-    function enviarWhatsApp(m) {
-      if (!pedidos[m]) return;
-      let texto = "*CASA GOURMET*\n*Mesa " + m + "*\n\n";
-      let total = 0;
-      pedidos[m].forEach(p => { texto += "- " + p.nombre + ": $" + p.precio + "\n"; total += p.precio; });
-      texto += "\n*TOTAL: $" + total + "*";
-      window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
-    }
-
-    function configCategorias(){
-      let html="<h3>Categorías</h3><button onclick='nuevaCategoria()'>+ Nueva</button>";
-      categorias.forEach((c,i)=>{ html+=`<div class='card'>${c} <button class='btn-danger' onclick='eliminarCategoria(${i})'>🗑️</button></div>`; });
-      html+="<br><button onclick='config()'>Volver</button>";
-      document.getElementById("app").innerHTML=html;
-    }
-    function nuevaCategoria(){ let c=prompt("Nombre"); if(c && !categorias.includes(c)){ categorias.push(c); guardar(); configCategorias(); } }
-    function eliminarCategoria(i){ if(confirm("¿Eliminar?")){ menu=menu.filter(p=>p.categoria!==categorias[i]); categorias.splice(i,1); guardar(); configCategorias(); } }
-    
-    function configMesas() {
-      let html="<h3>Editar Mesas</h3>";
-      listaMesas.forEach((m, i) => { html += `<div class='card' style='margin:10px auto; max-width:300px; display:flex; justify-content:space-between; align-items:center'><span>Mesa ${m}</span><button class='btn-danger' onclick='eliminarMesa(${i})'>🗑️</button></div>`; });
-      html += "<br><button onclick='config()'>Volver</button>";
-      document.getElementById("app").innerHTML = html;
-    }
-    function eliminarMesa(i) { if(confirm("¿Eliminar?")) { listaMesas.splice(i, 1); guardar(); configMesas(); } }
-    function agregarNuevaMesa() { let n = prompt("Nombre:"); if(n && !listaMesas.includes(n)) { listaMesas.push(n); guardar(); verMesas(); } }
-
-    function nuevoProducto(){ 
-      let html="<h3>Producto</h3><input id='prodNombre' placeholder='Nombre'><br><input id='prodPrecio' type='number' placeholder='Precio'><br><select id='prodCategoria'>";
-      categorias.forEach(c=>{ html+=`<option value="${c}">${c}</option>`; });
-      html+="</select><br><br><button onclick='guardarNuevoProducto()'>✅ Guardar</button> <button onclick='config()' style='background:#444'>Cancelar</button>";
-      document.getElementById("app").innerHTML=html;
-    }
-    function guardarNuevoProducto(){
-      let n=document.getElementById("prodNombre").value, pr=document.getElementById("prodPrecio").value, c=document.getElementById("prodCategoria")?.value;
-      if(n && pr && c){ menu.push({nombre:n,precio:parseFloat(pr),categoria:c}); guardar(); config(); }
-    }
-
-    function exportarMenu() {
-      const data = JSON.stringify({ menu, categorias });
-      const blob = new Blob([data], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'menu_casa_gourmet.json';
-      a.click();
-    }
-
-    function importarMenu() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = e => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          try {
-            const content = JSON.parse(ev.target.result);
-            if (content.menu) { menu = content.menu; categorias = content.categorias; guardar(); config(); alert("✅ Listo"); }
-          } catch(err) { alert("Error"); }
-        };
-        reader.readAsText(e.target.files[0]);
-      };
-      input.click();
-    }
-
-    function reiniciarCaja(){ if(confirm("¿Limpiar historial?")){ ventasDia = 0; historialVentas = []; guardar(); config(); } }
-    function verHistorial() {
-      let html="<h3>Historial de Hoy</h3>";
-      if(historialVentas.length === 0) html += "<p>Sin ventas.</p>";
-      historialVentas.slice().reverse().forEach(v => {
-        html += `<div class='card' style='text-align:left; margin-bottom:10px'>
-          <small>${v.hora}</small> | <b>Mesa ${v.mesa}</b><br>
-          <small>${v.detalles}</small><br>
-          <b style='color:#0f0'>$${v.total}</b>
-        </div>`;
+    // Registro del Service Worker para Offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js');
       });
-      html += "<br><button onclick='config()'>Volver</button>";
-      document.getElementById("app").innerHTML = html;
     }
-
-    chequearAcceso();
-    
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Modo Offline Activado', reg))
-        .catch(err => console.log('Error al activar offline', err));
-    });
-  }
   </script> 
 </body> 
 </html>
