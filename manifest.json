@@ -1,0 +1,21 @@
+{
+  "name": "Casa Gourmet POS",
+  "short_name": "Casa Gourmet",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0b0b",
+  "theme_color": "#d4af37",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "logo-casa-gourmet.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo-casa-gourmet.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
