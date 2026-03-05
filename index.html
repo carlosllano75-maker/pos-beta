@@ -5,48 +5,53 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> 
   <title>Ferretería POS Beta</title>
   
-  <meta name="theme-color" content="#2c3e50"> <link rel="manifest" href="manifest.json">
-  <script src="html2canvas.min.js"></script>
+  <meta name="theme-color" content="#2c3e50">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style> 
     body{font-family:'Segoe UI',Arial; background:#f4f7f6; color:#333; margin:0; padding-bottom:50px;} 
     header{background:#2c3e50; padding:15px; text-align:center; color:white; border-bottom:4px solid #e67e22} 
     .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; padding:10px} 
-    .card{background:white; border-radius:8px; padding:12px; text-align:center; border:1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1)} 
+    .card{background:white; border-radius:8px; padding:12px; text-align:center; border:1px solid #ddd; cursor:pointer; transition: 0.2s;} 
+    .card:active{transform: scale(0.95); background: #ecf0f1;}
     button{padding:10px; border:none; border-radius:5px; background:#e67e22; color:white; font-weight:bold; cursor:pointer;} 
-    .btn-venta{background:#27ae60; width:90%; margin:10px auto; display:block; font-size:1.1em}
-    .lista{background:white; padding:15px; border-radius:8px; margin:10px; border:1px solid #ddd} 
+    .btn-venta{background:#27ae60; width:90%; margin:10px auto; display:block; font-size:1.1em; padding:15px}
+    .lista{background:white; padding:15px; border-radius:8px; margin:10px; border:1px solid #ddd; box-shadow: 0 -2px 10px rgba(0,0,0,0.05)} 
     .item-pedido{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; border-bottom:1px solid #eee; padding:5px 0}
-    input, select{padding:10px; border-radius:5px; border:1px solid #ccc; width:80%; margin:5px}
+    input, select{padding:12px; border-radius:5px; border:1px solid #ccc; width:90%; margin:10px auto; display:block; font-size:16px}
     #app{padding:10px;}
     .badge{background:#2c3e50; color:white; padding:2px 6px; border-radius:4px; font-size:0.8em}
     
     /* Estilo del Ticket */
     #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;}
-    .ticket-termico { width:280px; background:white; color:black; padding:15px; font-family:monospace; font-size:12px; }
+    .ticket-termico { width:280px; background:white; color:black; padding:20px; font-family:monospace; font-size:12px; }
+    
+    .buscador-container { position: sticky; top: 0; background: #f4f7f6; z-index: 100; padding: 5px 0; border-bottom: 1px solid #ddd; }
   </style> 
 </head> 
 <body> 
 
   <div id="ticket-wrapper">
     <div id="ticket-visual" class="ticket-termico">
-      <h3 style="margin:0">FERRETERÍA BETA</h3>
-      <p id="t-fecha"></p>
+      <h3 style="text-align:center; margin:0">FERRETERÍA PRO</h3>
+      <p style="text-align:center; font-size:10px" id="t-fecha"></p>
       <hr>
       <div id="t-items"></div>
+      <div id="t-detalles" style="text-align:right; margin-top:10px"></div>
       <hr>
-      <h2 id="t-total" style="text-align:right"></h2>
-      <p style="text-align:center">¡Gracias por su confianza!</p>
+      <h2 id="t-total" style="text-align:right; margin:5px 0"></h2>
+      <p style="text-align:center; margin-top:20px">*** Gracias por su compra ***</p>
     </div>
   </div>
 
   <header> 
-    <b>🛠️ FERRE SISTEMA PRO (BETA)</b> 
+    <b>🛠️ FERRE SISTEMA (BETA)</b> 
   </header> 
   
-  <div style="text-align:center; background:#ecf0f1; padding:10px">
+  <div style="text-align:center; background:#ecf0f1; padding:10px; display:flex; justify-content:space-around">
     <button onclick="verInventario()">📦 Productos</button>
-    <button onclick="nuevaVenta()" style="background:#27ae60">➕ Nueva Venta</button>
+    <button onclick="nuevaVenta()" style="background:#27ae60">➕ Vender</button>
     <button onclick="verConfig()">⚙️ Ajustes</button>
   </div>
 
@@ -56,31 +61,42 @@
     let productos = JSON.parse(localStorage.getItem("ferre_prods") || "[]");
     let carrito = [];
     let ventasTotales = parseFloat(localStorage.getItem("ferre_ventas") || "0");
+    window.descuentoActivo = 0;
 
     function guardar() {
       localStorage.setItem("ferre_prods", JSON.stringify(productos));
       localStorage.setItem("ferre_ventas", ventasTotales.toString());
     }
 
+    // --- BUSCADOR ---
+    function filtrarProductos() {
+      const busqueda = document.getElementById("buscar-prod").value.toLowerCase();
+      const cards = document.querySelectorAll(".card-prod");
+      cards.forEach(card => {
+        const nombre = card.getAttribute("data-nombre").toLowerCase();
+        card.style.display = nombre.includes(busqueda) ? "block" : "none";
+      });
+    }
+
     // --- VISTA: INVENTARIO ---
     function verInventario() {
-      let html = "<h3>Inventario / Precios</h3>";
-      html += "<button onclick='agregarProducto()'>+ Agregar Producto</button><br><br>";
+      let html = "<h3>Inventario</h3>";
+      html += "<button onclick='agregarProducto()' style='width:100%'>+ Agregar Nuevo Producto</button><br><br>";
       html += "<div class='grid'>";
       productos.forEach((p, i) => {
         html += `<div class='card'><b>${p.nombre}</b><br>
                 <span class='badge'>${p.cat}</span><br>
-                <b>$${p.precio}</b><br>
-                <button onclick='eliminarProd(${i})' style='background:#c0392b; margin-top:5px'>🗑️</button></div>`;
+                <b>$${p.precio.toLocaleString()}</b><br>
+                <button onclick='eliminarProd(${i})' style='background:#c0392b; margin-top:5px; padding:5px 10px'>Eliminar</button></div>`;
       });
       html += "</div>";
       document.getElementById("app").innerHTML = html;
     }
 
     function agregarProducto() {
-      let n = prompt("Nombre del material:");
+      let n = prompt("Nombre del producto/material:");
       let pr = prompt("Precio de venta:");
-      let c = prompt("Categoría (Ej: Plomería, Eléctrico, Herramientas):");
+      let c = prompt("Categoría (Ej: Herramientas, Tornillería, Pintura):", "General");
       if(n && pr) {
         productos.push({nombre: n, precio: parseFloat(pr), cat: c});
         guardar();
@@ -88,19 +104,25 @@
       }
     }
 
-    function eliminarProd(i) { if(confirm("¿Eliminar producto?")) { productos.splice(i, 1); guardar(); verInventario(); } }
+    function eliminarProd(i) { if(confirm("¿Eliminar este producto?")) { productos.splice(i, 1); guardar(); verInventario(); } }
 
     // --- VISTA: VENTA ---
     function nuevaVenta() {
-      let html = "<h3>Nueva Venta</h3>";
-      html += "<div class='grid'>";
+      let html = `
+        <div class="buscador-container">
+          <input type="text" id="buscar-prod" placeholder="🔍 Buscar producto..." onkeyup="filtrarProductos()">
+        </div>
+        <h3>Seleccione Productos</h3>
+        <div class='grid'>`;
+      
       productos.forEach(p => {
-        html += `<div class='card' onclick='alCarrito("${p.nombre}", ${p.precio})'>
-                  <b>${p.nombre}</b><br>$${p.precio}
-                </div>`;
+        html += `
+          <div class='card card-prod' data-nombre="${p.nombre}" onclick='alCarrito("${p.nombre}", ${p.precio})'>
+            <b>${p.nombre}</b><br>$${p.precio.toLocaleString()}
+          </div>`;
       });
-      html += "</div>";
-      html += "<div class='lista' id='lista-carrito'></div>";
+      
+      html += "</div><div class='lista' id='lista-carrito'></div>";
       document.getElementById("app").innerHTML = html;
       actualizarCarrito();
     }
@@ -111,63 +133,106 @@
     }
 
     function actualizarCarrito() {
-      let html = "<b>Detalle de Venta:</b><br>";
-      let total = 0;
+      let subtotal = 0;
+      carrito.forEach(item => subtotal += item.precio);
+      
+      let valorDescuento = (subtotal * window.descuentoActivo) / 100;
+      let totalFinal = subtotal - valorDescuento;
+
+      let html = "<b>Detalle del Pedido:</b><br>";
       carrito.forEach((item, i) => {
-        total += item.precio;
         html += `<div class='item-pedido'><span>${item.nombre}</span> 
-                <span>$${item.precio} <button onclick='quitar(${i})' style='background:red; padding:2px 5px'>x</button></span></div>`;
+                <span>$${item.precio.toLocaleString()} <button onclick='quitar(${i})' style='background:red; padding:2px 5px'>x</button></span></div>`;
       });
-      html += `<h4>TOTAL: $${total}</h4>`;
-      if(carrito.length > 0) html += `<button class='btn-venta' onclick='finalizarVenta(${total})'>💰 FINALIZAR Y TICKET</button>`;
+
+      html += `<div style="text-align:right; margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">`;
+      html += `Subtotal: $${subtotal.toLocaleString()}<br>`;
+      html += `<button onclick="aplicarDescuento()" style="background:#34495e; padding:5px 10px; font-size:0.8em; margin:5px 0">🏷️ Aplicar Descuento (${window.descuentoActivo}%)</button><br>`;
+      
+      if(window.descuentoActivo > 0) {
+        html += `<b style="color:#c0392b">- Descuento: $${valorDescuento.toLocaleString()}</b><br>`;
+      }
+      
+      html += `<h3 style="margin:10px 0; color:#2c3e50">TOTAL: $${totalFinal.toLocaleString()}</h3></div>`;
+
+      if(carrito.length > 0) {
+        html += `<button class='btn-venta' onclick='finalizarVenta(${subtotal}, ${valorDescuento}, ${totalFinal})'>💰 GENERAR TICKET</button>`;
+      }
       document.getElementById("lista-carrito").innerHTML = html;
     }
 
     function quitar(i) { carrito.splice(i, 1); actualizarCarrito(); }
 
-    function finalizarVenta(total) {
-      if(!confirm("¿Confirmar venta de $" + total + "?")) return;
+    function aplicarDescuento() {
+      let d = prompt("Porcentaje de descuento a aplicar (0-100):", window.descuentoActivo);
+      if (d !== null && !isNaN(d)) {
+        window.descuentoActivo = parseFloat(d);
+        actualizarCarrito();
+      }
+    }
+
+    function finalizarVenta(subtotal, descuento, total) {
+      if(!confirm("¿Finalizar venta por $" + total.toLocaleString() + "?")) return;
       
-      // Preparar Ticket
       document.getElementById("t-fecha").innerText = new Date().toLocaleString();
       let itemsHTML = "";
       carrito.forEach(item => {
-        itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${item.nombre}</span><span>$${item.precio}</span></div>`;
+        itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${item.nombre}</span><span>$${item.precio.toLocaleString()}</span></div>`;
       });
       document.getElementById("t-items").innerHTML = itemsHTML;
-      document.getElementById("t-total").innerText = "TOTAL: $" + total;
+
+      let detallesHTML = "";
+      if(descuento > 0) {
+        detallesHTML += `Subtotal: $${subtotal.toLocaleString()}<br>`;
+        detallesHTML += `Desc. (${window.descuentoActivo}%): -$${descuento.toLocaleString()}<br>`;
+      }
+      document.getElementById("t-detalles").innerHTML = detallesHTML;
+      document.getElementById("t-total").innerText = "TOTAL: $" + total.toLocaleString();
 
       document.getElementById("ticket-wrapper").style.display = "flex";
 
       setTimeout(() => {
         html2canvas(document.getElementById("ticket-visual")).then(canvas => {
           let link = document.createElement('a');
-          link.download = 'Ticket_Ferreteria.png';
+          link.download = 'Ticket_Ferreteria_' + Date.now() + '.png';
           link.href = canvas.toDataURL();
           link.click();
           
           ventasTotales += total;
           carrito = [];
+          window.descuentoActivo = 0;
           guardar();
           document.getElementById("ticket-wrapper").style.display = "none";
           nuevaVenta();
-          alert("Venta registrada con éxito");
+          alert("Venta guardada y ticket descargado.");
         });
       }, 500);
     }
 
     function verConfig() {
-      document.getElementById("app").innerHTML = `<h3>Ajustes</h3>
-      <div class='card'><h4>Ventas del día: $${ventasTotales}</h4>
-      <button onclick='localStorage.clear(); location.reload();' style='background:red'>Reiniciar Todo</button></div>`;
+      document.getElementById("app").innerHTML = `
+        <h3>Reporte y Ajustes</h3>
+        <div class='card' style='padding:20px'>
+          <h2 style="color:#27ae60">Ventas Acumuladas: $${ventasTotales.toLocaleString()}</h2>
+          <hr>
+          <button onclick='resetCaja()' style='background:red; width:100%'>Cerrar Caja (Reiniciar Ventas)</button>
+        </div>`;
+    }
+
+    function resetCaja() {
+      if(confirm("¿Seguro que desea reiniciar las ventas a $0?")) {
+        ventasTotales = 0;
+        guardar();
+        verConfig();
+      }
     }
 
     verInventario();
 
-    // Registro del Service Worker para Offline
+    // Registro de Service Worker para funcionamiento Offline
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW error", err));
       });
     }
   </script> 
