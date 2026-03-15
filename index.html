@@ -24,8 +24,20 @@
     input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
     .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
     
+    /* --- AJUSTES DE TICKET (LETRA GRANDE Y NEGRITA) --- */
     #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:2000; overflow-y:auto;}
-    .ticket-termico { width: 54mm; background:white; color:black; padding: 15px 4mm; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.2; }
+    .ticket-termico { 
+        width: 56mm; 
+        background:white; 
+        color:black; 
+        padding: 15px 2mm; 
+        font-family: 'Courier New', monospace; 
+        font-size: 16px; /* Aumentado de 12px a 16px */
+        font-weight: bold; /* Todo en negrita para mejor lectura térmica */
+        line-height: 1.1; 
+    }
+    .ticket-termico b { font-size: 20px; } /* Encabezados y Total más grandes */
+
     #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
     @media print {
@@ -33,7 +45,7 @@
       body { margin: 0; }
       #contenido-app, .no-print, header, .menu-superior { display: none !important; }
       #ticket-wrapper { position: absolute; top:0; left:0; background: white; display: block; width: 100%; }
-      .ticket-termico { width: 100%; border: none; padding: 10px; margin: 0; }
+      .ticket-termico { width: 100%; border: none; padding: 5px; margin: 0; }
     }
   </style> 
 </head> 
@@ -86,7 +98,6 @@
       verificarAlertaBackup();
     }
 
-    // --- LICENCIA ---
     function validarLicencia() {
       if(document.getElementById("passInput").value === CLAVE_MAESTRA) {
         let venc = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
@@ -114,7 +125,6 @@
       if(alerta) alerta.style.display = (Date.now() - ultimoBackup > 604800000) ? "block" : "none";
     }
 
-    // --- EXCEL ---
     function exportarExcel() {
         const ws = XLSX.utils.json_to_sheet(productos.map(p => ({ NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo })));
         const wb = XLSX.utils.book_new();
@@ -142,7 +152,6 @@
         reader.readAsBinaryString(e.target.files[0]);
     }
 
-    // --- MÓDULOS INTACTOS ---
     function verCategorias() {
       let html = "<h3>🏷️ Categorías</h3><input type='text' id='nueva-cat' placeholder='Nueva categoría'><button onclick='agregarCat()' style='width:100%'>+ Añadir</button><br><br>";
       categorias.forEach((c, i) => { html += `<div class='lista item-pedido'><span>${c}</span> <button onclick='categorias.splice(${i},1);guardar();verCategorias()' style='background:var(--danger)'>🗑️</button></div>`; });
@@ -175,7 +184,6 @@
     }
     function saveP(idx) { let obj = { nombre: document.getElementById('p-n').value, coste: parseFloat(document.getElementById('p-coste').value || 0), precio: parseFloat(document.getElementById('p-p').value), cat: document.getElementById('p-c').value, stock: parseInt(document.getElementById('p-s').value), minimo: parseInt(document.getElementById('p-m').value) }; if(idx===-1) productos.push(obj); else productos[idx] = obj; guardar(); verInventario(); }
 
-    // --- VENTA Y CARRITO ---
     function nuevaVenta() {
       cliSel = null; carrito = [];
       let html = `<div class='lista'><b>👤 CLIENTE:</b><input type="text" id="busc-cli-v" placeholder="🔍 Buscar nombre..." oninput="filtrarCliVenta()"><select id="sel-cliente" onchange="asignarCliVenta()"><option value="">👤 Consumidor Final</option></select><div id="info-cli-v" style="font-size:11px; color:var(--blue); margin-top:5px; font-weight:bold"></div><hr><b>📦 PRODUCTO:</b><input type="text" placeholder="🔍 Buscar..." onkeyup="filtrarP(this.value)"></div><div class='grid'>`;
@@ -217,7 +225,6 @@
       document.getElementById("lista-carrito").innerHTML = html;
     }
 
-    // --- FINALIZAR Y TICKET CON AUTO-DESCARGA ---
     function finalizarVenta(total, esVenta) {
       if(esVenta) {
         let uTotal = 0;
@@ -226,29 +233,29 @@
       }
       let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
       
+      /* --- TICKET ACTUALIZADO CON LETRA GRANDE --- */
       document.getElementById("ticket-contenido").innerHTML = `
-        <div style="text-align:center; margin-bottom:10px;">
-          <b style="font-size:16px;">LA BODEGUITA</b><br>
-          <span>${titulo}</span>
+        <div style="text-align:center; margin-bottom:15px;">
+          <b style="font-size:24px;">LA BODEGUITA</b><br>
+          <span style="font-size:18px;">${titulo}</span>
         </div>
-        <div style="font-size:11px; margin-bottom:8px;">
-          CLIENTE: ${cliSel ? cliSel.nombre : 'Consumidor Final'}<br>
-          FECHA: ${new Date().toLocaleString()}
+        <div style="font-size:15px; margin-bottom:10px; border-bottom:2px solid #000; padding-bottom:5px;">
+          CLI: ${cliSel ? cliSel.nombre.toUpperCase() : 'CONSUMIDOR FINAL'}<br>
+          FEC: ${new Date().toLocaleString()}
         </div>
-        <div style="border-top:1px dashed #000; padding-top:5px;">
-          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${i.cantidad} ${i.nombre}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
+        <div style="margin-bottom:10px;">
+          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${i.cantidad} ${i.nombre.toUpperCase()}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
         </div>
-        <div style="border-top:1px dashed #000; margin-top:5px; padding-top:5px; text-align:right;">
-          <b style="font-size:14px;">TOTAL: $${total.toLocaleString()}</b>
+        <div style="border-top:2px solid #000; margin-top:5px; padding-top:10px; text-align:right;">
+          <b style="font-size:22px;">TOTAL: $${total.toLocaleString()}</b>
         </div>
-        <div style="text-align:center; margin-top:15px; font-size:10px;">¡Gracias por su compra!</div>`;
+        <div style="text-align:center; margin-top:25px; font-size:14px;">¡GRACIAS POR SU COMPRA!</div>`;
       
       document.getElementById("ticket-wrapper").style.display = "flex";
       guardar();
 
-      // DESCARGA AUTOMÁTICA DE LA FOTO
       setTimeout(() => {
-        html2canvas(document.getElementById("ticket-visual"), { scale: 2 }).then(canvas => {
+        html2canvas(document.getElementById("ticket-visual"), { scale: 3 }).then(canvas => {
           let link = document.createElement('a'); 
           link.download = `${titulo}_${Date.now()}.png`; 
           link.href = canvas.toDataURL("image/png"); 
@@ -261,10 +268,9 @@
 
     function cerrarTicket() {
         document.getElementById('ticket-wrapper').style.display = 'none';
-        nuevaVenta(); // Esto reinicia el total y limpia el carrito visualmente
+        nuevaVenta();
     }
 
-    // --- REPORTES Y BACKUP ---
     function verConfig() {
       let tV = 0, tU = 0;
       historialVentas.forEach(v => { tV += v.total; tU += (v.utilidad || 0); });
@@ -283,3 +289,4 @@
   </script> 
 </body> 
 </html>
+
