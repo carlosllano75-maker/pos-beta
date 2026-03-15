@@ -26,7 +26,7 @@
     button:active{opacity:0.7}
     .btn-danger{background:#ff4444 !important;color:#fff;padding:5px 10px}
     .btn-edit{background:#3498db !important;color:#fff;padding:5px 10px}
-    .btn-obs{background:#f39c12 !important;color:#fff;padding:5px 10px} /* Nuevo botón de notas */
+    .btn-obs{background:#f39c12 !important;color:#fff;padding:5px 10px}
     .lista{background:#111;padding:15px;border-radius:15px;margin:15px;border-left:4px solid #d4af37} 
     select, input{padding:12px;border-radius:10px;margin:8px 0;background:#222;color:#fff;border:1px solid #444;width:80%;max-width:300px}
     h3{color:#d4af37;margin-top:20px}
@@ -268,7 +268,6 @@
       guardar(); abrirMesa(m); 
     }
  
-    /* NUEVA FUNCIÓN PARA AGREGAR LA OBSERVACIÓN */
     function agregarObservacion(m, i) {
       let obsActual = pedidos[m][i].observacion || "";
       let nuevaObs = prompt("Observación (Ej: Sin cebolla):", obsActual);
@@ -288,7 +287,6 @@
           total += subtotal; 
           let txtObs = p.observacion ? `<br><span style="color:#f39c12;font-size:16px;font-weight:bold;">Nota: ${p.observacion}</span>` : "";
           
-          /* Modificado para incluir el texto de la observación y el botón naranja (btn-obs) */
           html+=`<div class='item-pedido'>
                     <div style="text-align:left">${cant}x ${p.nombre}${txtObs}</div> 
                     <div>
@@ -317,7 +315,6 @@
           let subtotal = p.precio * cant;
           totalMesa += subtotal;
           
-          /* Modificado para que la observación salga en el ticket de pago */
           itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${cant}x ${p.nombre}</span><span>$${subtotal}</span></div>`;
           if (p.observacion) {
             itemsHTML += `<div style="text-align:left; font-size:18px; font-weight:bold; margin-top:-5px; margin-bottom:5px;">* Obs: ${p.observacion}</div>`;
@@ -393,4 +390,117 @@
     function configCategorias(){
       let html="<h3>Categorías</h3><button onclick='nuevaCategoria()'>+ Nueva</button>";
       categorias.forEach((c,i)=>{ html+=`<div class='card'>${c} <button class='btn-danger' onclick='eliminarCategoria(${i})'>🗑️</button></div>`; });
-      html+="<br><button onclick='confi
+      html+="<br><button onclick='config()'>Volver</button>";
+      document.getElementById("app").innerHTML=html;
+    }
+    function nuevaCategoria(){ let c=prompt("Nombre"); if(c && !categorias.includes(c)){ categorias.push(c); guardar(); configCategorias(); } }
+    function eliminarCategoria(i){ if(confirm("¿Eliminar?")){ menu=menu.filter(p=>p.categoria!==categorias[i]); categorias.splice(i,1); guardar(); configCategorias(); } }
+
+    function configMesas() {
+
+      let html="<h3>Editar Mesas</h3>";
+
+      listaMesas.forEach((m, i) => { html += `<div class='card' style='margin:10px auto; max-width:300px; display:flex; justify-content:space-between; align-items:center'><span>Mesa ${m}</span><button class='btn-danger' onclick='eliminarMesa(${i})'>🗑️</button></div>`; });
+
+      html += "<br><button onclick='config()'>Volver</button>";
+
+      document.getElementById("app").innerHTML = html;
+
+    }
+
+    function eliminarMesa(i) { if(confirm("¿Eliminar?")) { listaMesas.splice(i, 1); guardar(); configMesas(); } }
+
+    function agregarNuevaMesa() { let n = prompt("Nombre:"); if(n && !listaMesas.includes(n)) { listaMesas.push(n); guardar(); verMesas(); } }
+
+    function nuevoProducto(){ 
+
+      let html="<h3>Nuevo Producto</h3><input id='prodNombre' placeholder='Nombre'><br><input id='prodPrecio' type='number' placeholder='Precio'><br><select id='prodCategoria'>";
+
+      categorias.forEach(c=>{ html+=`<option value="${c}">${c}</option>`; });
+
+      html+="</select><br><br><button onclick='guardarNuevoProducto()'>✅ Guardar</button> <button onclick='config()' style='background:#444'>Cancelar</button>";
+
+      document.getElementById("app").innerHTML=html;
+
+    }
+
+    function guardarNuevoProducto(){
+
+      let n=document.getElementById("prodNombre").value, pr=document.getElementById("prodPrecio").value, c=document.getElementById("prodCategoria")?.value;
+
+      if(n && pr && c){ menu.push({nombre:n,precio:parseFloat(pr),categoria:c, cantidad:1}); guardar(); config(); }
+
+    }
+
+    function reiniciarCaja(){ if(confirm("¿Limpiar historial?")){ ventasDia = 0; historialVentas = []; guardar(); config(); } }
+
+    function verHistorial() {
+
+      let html="<h3>Historial de Hoy</h3>";
+
+      historialVentas.slice().reverse().forEach(v => {
+
+        html += `<div class='card' style='text-align:left; margin-bottom:10px'><small>${v.hora}</small> | <b>Mesa ${v.mesa}</b><br><small>${v.detalles}</small><br><b style='color:#0f0'>$${v.total}</b></div>`;
+
+      });
+
+      html += "<br><button onclick='config()'>Volver</button>";
+
+      document.getElementById("app").innerHTML = html;
+
+    }
+
+    
+
+    function enviarWhatsApp(m) {
+
+      if (!pedidos[m]) return;
+
+      let texto = "*CASA GOURMET*\n*Mesa " + m + "*\n\n";
+
+      let total = 0;
+
+      pedidos[m].forEach(p => { 
+
+        let cant = p.cantidad || 1;
+
+        let subtotal = p.precio * cant;
+
+        let obsTexto = p.observacion ? " (*" + p.observacion + "*)" : "";
+
+        texto += "- " + cant + "x " + p.nombre + obsTexto + ": $" + subtotal + "\n"; 
+
+        total += subtotal; 
+
+      });
+
+      texto += "\n*TOTAL: $" + total + "*";
+
+      window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
+
+    }
+
+ 
+
+    if ('serviceWorker' in navigator) {
+
+      window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('./sw.js').then(reg => console.log('Offline OK')).catch(err => console.log('Offline Error'));
+
+      });
+
+    }
+
+ 
+
+    chequearAcceso();
+
+  </script> 
+
+</body> 
+
+</html>
+
+
+      
