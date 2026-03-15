@@ -1,582 +1,302 @@
 <!DOCTYPE html> 
-
-<html lang=”es”> 
-
+<html lang="es"> 
 <head> 
-
-  <meta charset=”UTF-8”> 
-
-  <meta name=”viewport” content=”width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no”> 
-
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> 
   <title>LA BODEGUITA PRO – Multi-Venta</title>
+  <meta name="theme-color" content="#2c3e50">
+  
+  <link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZnaGqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Z">
 
-  <meta name=”theme-color” content=”#2c3e50”>
-
-  <script src=https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js></script>
-
-  <script src=https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js></script>
-
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
   <style> 
-
     :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --bg: #f4f7f6; --blue: #3498db; --warning: #f39c12; --danger: #e74c3c; }
-
-    Body{font-family:’Segoe UI’,Arial,sans-serif; background:var(--bg); color:#333; margin:0; padding-bottom:60px;} 
-
-    Header{background: linear-gradient(135deg, var(--primary) 0%, #000 100%); padding:15px; text-align:center; color:white; border-bottom:4px solid var(--accent); position: sticky; top:0; z-index:1000;} 
-
+    body{font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:#333; margin:0; padding-bottom:60px;} 
+    header{background: linear-gradient(135deg, var(--primary) 0%, #000 100%); padding:15px; text-align:center; color:white; border-bottom:4px solid var(--accent); position: sticky; top:0; z-index:1000;} 
     .alerta-backup { background: var(--warning); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; display: none; cursor: pointer; }
-
     .menu-superior{display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; background:#ecf0f1; padding:10px;}
-
     .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; padding:10px} 
-
     .card{background:white; border-radius:10px; padding:12px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;} 
-
-    .stock-bajo { border: 2px solid var(--danger) ¡important; background: #fff5f5; }
-
-    Button{padding:10px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:bold; cursor:pointer;} 
-
+    .stock-bajo { border: 2px solid var(--danger) !important; background: #fff5f5; }
+    button{padding:10px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:bold; cursor:pointer;} 
     .btn-venta{background:var(--success); width:95%; margin:10px auto; display:block; font-size:1.1em; padding:15px;}
-
     .lista{background:white; padding:15px; border-radius:12px; margin:10px; border:1px solid #ddd;} 
-
     .item-pedido{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; border-bottom:1px solid #eee; padding:5px 0}
-
-    Input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
-
+    input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
     .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
-
     
-
-    /* AJUSTE DE TICKET LETRA GIGANTE */
-
     #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:2000; overflow-y:auto;}
-
     .ticket-termico { 
-
-        Width: 56mm; 
-
-        Background:white; 
-
-        Color:black; 
-
-        Padding: 15px 2mm; 
-
-        Font-family: ‘Courier New’, monospace; 
-
-        Font-size: 22px; /* TEXTO GENERAL MUCHO MÁS GRANDE */
-
-        Font-weight: 900; /* NEGRITA EXTREMA */
-
-        Line-height: 1.1; 
-
+        width: 56mm; 
+        background:white; 
+        color:black; 
+        padding: 15px 2mm; 
+        font-family: 'Courier New', monospace; 
+        font-size: 22px; 
+        font-weight: 900; 
+        line-height: 1.1; 
     }
-
-    .ticket-termico b { font-size: 28px; } /* TÍTULOS Y TOTAL GIGANTES */
-
-
+    .ticket-termico b { font-size: 28px; }
 
     #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-
-
     @media print {
-
       @page { margin: 0; size: auto; }
-
-      Body { margin: 0; }
-
-      #contenido-app, .no-print, header, .menu-superior { display: none ¡important; }
-
+      body { margin: 0; }
+      #contenido-app, .no-print, header, .menu-superior { display: none !important; }
       #ticket-wrapper { position: absolute; top:0; left:0; background: white; display: block; width: 100%; }
-
       .ticket-termico { width: 100%; border: none; padding: 5px; margin: 0; }
-
     }
-
   </style> 
-
 </head> 
-
 <body> 
 
-
-
-  <div id=”ticket-wrapper”>
-
-    <div id=”ticket-visual” class=”ticket-termico”><div id=”ticket-contenido”></div></div>
-
-    <div class=”no-print” style=”margin-top:20px; display:flex; gap:10px;”>
-
-        <button onclick=”imprimirTicket()” style=”background:var(--success); padding:15px;”>🖨️ IMPRIMIR</button>
-
-        <button onclick=”cerrarTicket()” style=”background:var(--danger); padding:15px;”>❌ CERRAR</button>
-
+  <div id="ticket-wrapper">
+    <div id="ticket-visual" class="ticket-termico"><div id="ticket-contenido"></div></div>
+    <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
+        <button onclick="imprimirTicket()" style="background:var(--success); padding:15px;">🖨️ IMPRIMIR</button>
+        <button onclick="cerrarTicket()" style="background:var(--danger); padding:15px;">❌ CERRAR</button>
     </div>
-
   </div>
-
   
-
-  <div id=”bloqueo”>
-
-    <h2 style=”color:white”>SISTEMA PROTEGIDO</h2>
-
-    <input type=”password” id=”passInput” placeholder=”Clave de acceso” style=”text-align:center”><br>
-
-    <button onclick=”validarLicencia()” style=”background:var(--success)”>Activar Sistema</button>
-
+  <div id="bloqueo">
+    <img id="logo-login" src="" style="width:180px; margin-bottom:20px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));">
+    <h2 style="color:white">SISTEMA PROTEGIDO</h2>
+    <input type="password" id="passInput" placeholder="Clave de acceso" style="text-align:center"><br>
+    <button onclick="validarLicencia()" style="background:var(--success); padding: 15px 30px;">Activar Sistema</button>
   </div>
 
-
-
-  <div id=”contenido-app” style=”display:none”>
-
+  <div id="contenido-app" style="display:none">
     <header><b>🛠️ LA BODEGUITA PRO</b></header> 
-
-    <div id=”alerta-backup” class=”alerta-backup” onclick=”exportarDatos()”>⚠️ CLICK AQUÍ PARA REALIZAR BACKUP (RECOMENDADO)</div>
-
-    <div class=”menu-superior”>
-
-      <button onclick=”verInventario()”>📦 Stock</button>
-
-      <button onclick=”verClientes()”>👥 Clientes</button>
-
-      <button onclick=”verCategorias()”>🏷️ Cats</button>
-
-      <button onclick=”nuevaVenta()” style=”background:var(--success); grid-column: span 2;”>➕ Vender/Cotizar</button>
-
-      <button onclick=”verConfig()” style=”background:#7f8c8d”>📊 Reporte</button>
-
+    <div id="alerta-backup" class="alerta-backup" onclick="exportarDatos()">⚠️ CLICK AQUÍ PARA REALIZAR BACKUP (RECOMENDADO)</div>
+    <div class="menu-superior">
+      <button onclick="verInventario()">📦 Stock</button>
+      <button onclick="verClientes()">👥 Clientes</button>
+      <button onclick="verCategorias()">🏷️ Cats</button>
+      <button onclick="nuevaVenta()" style="background:var(--success); grid-column: span 2;">➕ Vender/Cotizar</button>
+      <button onclick="verConfig()" style="background:#7f8c8d">📊 Reporte</button>
     </div>
-
-    <div id=”app”></div> 
-
+    <div id="app"></div> 
   </div>
-
-
 
   <script> 
+    const LOGO_BASE64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZnaGqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Z";
+    
+    document.getElementById('logo-login').src = LOGO_BASE64;
 
-    Const CLAVE_MAESTRA = “BODEGUITA2024”;
+    const CLAVE_MAESTRA = "BODEGUITA2024";
+    const DIAS_LICENCIA = 30;
 
-    Const DIAS_LICENCIA = 30;
+    let productos = JSON.parse(localStorage.getItem("lb_prods") || "[]");
+    let clientes = JSON.parse(localStorage.getItem("lb_clientes") || "[]");
+    let categorias = JSON.parse(localStorage.getItem("lb_cats") || '["General"]');
+    let historialVentas = JSON.parse(localStorage.getItem("lb_historial") || "[]");
+    let ultimoBackup = localStorage.getItem("lb_last_backup") || Date.now();
+    let carrito = [];
+    let cliSel = null;
 
-
-
-    Let productos = JSON.parse(localStorage.getItem(“lb_prods”) || “[]”);
-
-    Let clientes = JSON.parse(localStorage.getItem(“lb_clientes”) || “[]”);
-
-    Let categorias = JSON.parse(localStorage.getItem(“lb_cats”) || ‘[“General”]’);
-
-    Let historialVentas = JSON.parse(localStorage.getItem(“lb_historial”) || “[]”);
-
-    Let ultimoBackup = localStorage.getItem(“lb_last_backup”) || Date.now();
-
-    Let carrito = [];
-
-    Let cliSel = null;
-
-
-
-    Function guardar() {
-
-      localStorage.setItem(“lb_prods”, JSON.stringify(productos));
-
-      localStorage.setItem(“lb_clientes”, JSON.stringify(clientes));
-
-      localStorage.setItem(“lb_cats”, JSON.stringify(categorias));
-
-      localStorage.setItem(“lb_historial”, JSON.stringify(historialVentas));
-
+    function guardar() {
+      localStorage.setItem("lb_prods", JSON.stringify(productos));
+      localStorage.setItem("lb_clientes", JSON.stringify(clientes));
+      localStorage.setItem("lb_cats", JSON.stringify(categorias));
+      localStorage.setItem("lb_historial", JSON.stringify(historialVentas));
       verificarAlertaBackup();
-
     }
 
-
-
-    Function validarLicencia() {
-
-      If(document.getElementById(“passInput”).value === CLAVE_MAESTRA) {
-
-        Let venc = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
-
-        localStorage.setItem(“lb_licencia_activa”, “true”);
-
-        localStorage.setItem(“lb_fecha_vencimiento”, venc);
-
+    function validarLicencia() {
+      if(document.getElementById("passInput").value === CLAVE_MAESTRA) {
+        let venc = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
+        localStorage.setItem("lb_licencia_activa", "true");
+        localStorage.setItem("lb_fecha_vencimiento", venc);
         chequearAcceso();
-
-      } else alert(“Clave incorrecta”);
-
+      } else alert("Clave incorrecta");
     }
 
-
-
-    Function chequearAcceso() {
-
-      Let activa = localStorage.getItem(“lb_licencia_activa”);
-
-      Let vencimiento = parseInt(localStorage.getItem(“lb_fecha_vencimiento”));
-
-      If(activa === “true” && vencimiento && new Date().getTime() < vencimiento) {
-
-        Document.getElementById(“bloqueo”).style.display = “none”;
-
-        Document.getElementById(“contenido-app”).style.display = “block”;
-
+    function chequearAcceso() {
+      let activa = localStorage.getItem("lb_licencia_activa");
+      let vencimiento = parseInt(localStorage.getItem("lb_fecha_vencimiento"));
+      if(activa === "true" && vencimiento && new Date().getTime() < vencimiento) {
+        document.getElementById("bloqueo").style.display = "none";
+        document.getElementById("contenido-app").style.display = "block";
         verificarAlertaBackup(); verInventario();
-
       } else {
-
-        Document.getElementById(“bloqueo”).style.display = “flex”;
-
-        Document.getElementById(“contenido-app”).style.display = “none”;
-
+        document.getElementById("bloqueo").style.display = "flex";
+        document.getElementById("contenido-app").style.display = "none";
       }
-
     }
 
-
-
-    Function verificarAlertaBackup() {
-
-      Const alerta = document.getElementById(“alerta-backup”);
-
-      If(alerta) alerta.style.display = (Date.now() – ultimoBackup > 604800000) ¿ “block” : “none”;
-
+    function verificarAlertaBackup() {
+      const alerta = document.getElementById("alerta-backup");
+      if(alerta) alerta.style.display = (Date.now() - ultimoBackup > 604800000) ? "block" : "none";
     }
 
-
-
-    Function exportarExcel() {
-
-        Const ws = XLSX.utils.json_to_sheet(productos.map(p => ({ NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo })));
-
-        Const wb = XLSX.utils.book_new();
-
-        XLSX.utils.book_append_sheet(wb, ws, “Inventario”);
-
-        XLSX.writeFile(wb, “Inventario_Bodeguita.xlsx”);
-
+    function exportarExcel() {
+        const ws = XLSX.utils.json_to_sheet(productos.map(p => ({ NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+        XLSX.writeFile(wb, "Inventario_Bodeguita.xlsx");
     }
 
-
-
-    Function importarExcel€ {
-
-        Const reader = new FileReader();
-
-        Reader.onload = (evt) => {
-
-            Const workbook = XLSX.read(evt.target.result, { type: ‘binary’ });
-
-            Const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-
-            If(confirm(`¿Cargar ${excelData.length} productos?`)) {
-
-                Productos = excelData.map(row => ({
-
-                    Nombre: row.NOMBRE || row.Nombre || “Sin nombre”,
-
-                    Coste: parseFloat(row.COSTE || row.Coste || 0),
-
-                    Precio: parseFloat(row.PRECIO || row.Precio || 0),
-
-                    Cat: row.CATEGORIA || row.Categoria || “General”,
-
-                    Stock: parseInt(row.STOCK || row.Stock || 0),
-
-                    Minimo: parseInt(row.MINIMO || row.Minimo || 10)
-
+    function importarExcel(e) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const workbook = XLSX.read(evt.target.result, { type: 'binary' });
+            const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            if(confirm(`¿Cargar ${excelData.length} productos?`)) {
+                productos = excelData.map(row => ({
+                    nombre: row.NOMBRE || row.Nombre || "Sin nombre",
+                    coste: parseFloat(row.COSTE || row.Coste || 0),
+                    precio: parseFloat(row.PRECIO || row.Precio || 0),
+                    cat: row.CATEGORIA || row.Categoria || "General",
+                    stock: parseInt(row.STOCK || row.Stock || 0),
+                    minimo: parseInt(row.MINIMO || row.Minimo || 10)
                 }));
-
-                Guardar(); verInventario();
-
+                guardar(); verInventario();
             }
-
         };
-
-        Reader.readAsBinaryString(e.target.files[0]);
-
+        reader.readAsBinaryString(e.target.files[0]);
     }
 
-
-
-    Function verCategorias() {
-
-      Let html = “<h3>🏷️ Categorías</h3><input type=’text’ id=’nueva-cat’ placeholder=’Nueva categoría’><button onclick=’agregarCat()’ style=’width:100%’>+ Añadir</button><br><br>”;
-
-      Categorias.forEach((c, i) => { html += `<div class=’lista item-pedido’><span>${c}</span> <button onclick=’categorias.splice(${i},1);guardar();verCategorias()’ style=’background:var(--danger)’>🗑️</button></div>`; });
-
-      Document.getElementById(“app”).innerHTML = html;
-
+    function verCategorias() {
+      let html = "<h3>🏷️ Categorías</h3><input type='text' id='nueva-cat' placeholder='Nueva categoría'><button onclick='agregarCat()' style='width:100%'>+ Añadir</button><br><br>";
+      categorias.forEach((c, i) => { html += `<div class='lista item-pedido'><span>${c}</span> <button onclick='categorias.splice(${i},1);guardar();verCategorias()' style='background:var(--danger)'>🗑️</button></div>`; });
+      document.getElementById("app").innerHTML = html;
     }
+    function agregarCat() { let n = document.getElementById("nueva-cat").value; if(n){categorias.push(n); guardar(); verCategorias();} }
 
-    Function agregarCat() { let n = document.getElementById(“nueva-cat”).value; if(n){categorias.push(n); guardar(); verCategorias();} }
-
-
-
-    Function verClientes() {
-
-      Let html = `<h3>👥 Clientes</h3><input type=”text” placeholder=”🔍 Buscar…” onkeyup=”filtrarClientes(this.value)”><button onclick=’agregarCliente()’ style=’width:100%’>+ Nuevo Cliente</button>`;
-
-      Clientes.forEach((c, i) => { html += `<div class=’lista cliente-card’ data-nombre=’${c.nombre}’><b>${c.nombre}</b><br>📞 ${c.tel}<br><button onclick=’editarCliente(${i})’ style=’background:var(--blue)’>✏️</button><button onclick=’clientes.splice(${i},1);guardar();verClientes()’ style=’background:var(--danger)’>🗑️</button></div>`; });
-
-      Document.getElementById(“app”).innerHTML = html;
-
+    function verClientes() {
+      let html = `<h3>👥 Clientes</h3><input type="text" placeholder="🔍 Buscar…" onkeyup="filtrarClientes(this.value)"><button onclick='agregarCliente()' style='width:100%'>+ Nuevo Cliente</button>`;
+      clientes.forEach((c, i) => { html += `<div class='lista cliente-card' data-nombre='${c.nombre}'><b>${c.nombre}</b><br>📞 ${c.tel}<br><button onclick='editarCliente(${i})' style='background:var(--blue)'>✏️</button><button onclick='clientes.splice(${i},1);guardar();verClientes()' style='background:var(--danger)'>🗑️</button></div>`; });
+      document.getElementById("app").innerHTML = html;
     }
+    function filtrarClientes(v) { document.querySelectorAll(".cliente-card").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
+    function agregarCliente() { let n = prompt("Nombre:"); let t = prompt("Tel:"); let d = prompt("Dir:"); if(n){clientes.push({nombre:n, tel:t, dir:d}); guardar(); verClientes();} }
+    function editarCliente(i) { clientes[i].nombre = prompt("Nombre:", clientes[i].nombre); clientes[i].tel = prompt("Tel:", clientes[i].tel); clientes[i].dir = prompt("Dir:", clientes[i].dir); guardar(); verClientes(); }
 
-    Function filtrarClientes(v) { document.querySelectorAll(“.cliente-card”).forEach(c => c.style.display = c.getAttribute(“data-nombre”).toLowerCase().includes(v.toLowerCase()) ¿ “block” : “none”); }
-
-    Function agregarCliente() { let n = prompt(“Nombre:”); let t = prompt(Tel:); let d = prompt(“Dir:”); if(n){clientes.push({nombre:n, tel:t, dir:d}); guardar(); verClientes();} }
-
-    Function editarCliente(i) { clientes[i].nombre = prompt(“Nombre:”, clientes[i].nombre); clientes[i].tel = prompt(Tel:, clientes[i].tel); clientes[i].dir = prompt(“Dir:”, clientes[i].dir); guardar(); verClientes(); }
-
-
-
-    Function verInventario() {
-
-      Let html = “<h3>📦 Inventario</h3><div class=’excel-tools’><button onclick=’exportarExcel()’ style=’background:#27ae60’>📗 Exp. Excel</button><button onclick=’document.getElementById(\”in-ex\”).click()’ style=’background:#2980b9’>📘 Imp. Excel</button><input type=’file’ id=’in-ex’ style=’display:none’ onchange=’importarExcel(event)’></div>”;
-
-      Html += “<button onclick=’abrirFormProducto()’ style=’width:100%’>+ Nuevo Producto</button><div class=’grid’>”;
-
-      Productos.forEach((p, i) => {
-
-        Let esBajo = p.stock <= (p.minimo || 10);
-
-        Html += `<div class=’card ${esBajo ¿ ‘stock-bajo’ : ‘’}’>${esBajo ¿ ‘<span style=”color:red;font-size:10px”>⚠️ BAJO</span>’ : ‘’}<b>${p.nombre}</b><br><b>$${p.precio.toLocaleString()}</b><br><span class=’badge’>${p.cat}</span><br><small>Stock: ${p.stock}</small><br><button onclick=’abrirFormProducto(${i})’ style=’background:var(--blue)’>✏️</button><button onclick=’if(confirm(“¿Eliminar?”)){productos.splice(${i},1);guardar();verInventario()}’ style=’background:var(--danger)’>🗑️</button></div>`;
-
+    function verInventario() {
+      let html = "<h3>📦 Inventario</h3><div class='excel-tools'><button onclick='exportarExcel()' style='background:#27ae60'>📗 Exp. Excel</button><button onclick='document.getElementById(\"in-ex\").click()' style='background:#2980b9'>📘 Imp. Excel</button><input type='file' id='in-ex' style='display:none' onchange='importarExcel(event)'></div>";
+      html += "<button onclick='abrirFormProducto()' style='width:100%'>+ Nuevo Producto</button><div class='grid'>";
+      productos.forEach((p, i) => {
+        let esBajo = p.stock <= (p.minimo || 10);
+        html += `<div class='card ${esBajo ? 'stock-bajo' : ''}'>${esBajo ? '<span style="color:red;font-size:10px">⚠️ BAJO</span>' : ''}<b>${p.nombre}</b><br><b>$${p.precio.toLocaleString()}</b><br><span class='badge'>${p.cat}</span><br><small>Stock: ${p.stock}</small><br><button onclick='abrirFormProducto(${i})' style='background:var(--blue)'>✏️</button><button onclick='if(confirm(\"¿Eliminar?\")){productos.splice(${i},1);guardar();verInventario()} ' style='background:var(--danger)'>🗑️</button></div>`;
       });
-
-      Document.getElementById(“app”).innerHTML = html + “</div>”;
-
+      document.getElementById("app").innerHTML = html + "</div>";
     }
 
-
-
-    Function abrirFormProducto(idx = -1) {
-
-      Let p = idx ¡== -1 ¿ productos[idx] : {nombre:””, coste:0, precio:””, cat:”General”, stock:0, minimo:10};
-
-      Document.getElementById(“app”).innerHTML = `<h3>${idx!==-1?’Editar’:’Nuevo’}</h3><input id=’p-n’ placeholder=’Nombre’ value=’${p.nombre}’><input id=’p-coste’ type=’number’ placeholder=’Costo’ value=’${p.coste || 0}’><input id=’p-p’ type=’number’ placeholder=’Precio’ value=’${p.precio}’><select id=’p-c’>${categorias.map(c => `<option value=”${c}” ${p.cat===c?’selected’:’’}>${c}</option>`).join(“”)}</select><input id=’p-s’ type=’number’ placeholder=’Stock’ value=’${p.stock}’><input id=’p-m’ type=’number’ placeholder=’Alerta en:’ value=’${p.minimo}’><button onclick=’saveP(${idx})’ style=’width:100%; background:var(--success)’>💾 Guardar</button>`;
-
+    function abrirFormProducto(idx = -1) {
+      let p = idx !== -1 ? productos[idx] : {nombre:"", coste:0, precio:"", cat:"General", stock:0, minimo:10};
+      document.getElementById("app").innerHTML = `<h3>${idx!==-1?'Editar':'Nuevo'}</h3><input id='p-n' placeholder='Nombre' value='${p.nombre}'><input id='p-coste' type='number' placeholder='Costo' value='${p.coste || 0}'><input id='p-p' type='number' placeholder='Precio' value='${p.precio}'><select id='p-c'>${categorias.map(c => `<option value="${c}" ${p.cat===c?'selected':''}>${c}</option>`).join("")}</select><input id='p-s' type='number' placeholder='Stock' value='${p.stock}'><input id='p-m' type='number' placeholder='Alerta en:' value='${p.minimo}'><button onclick='saveP(${idx})' style='width:100%; background:var(--success)'>💾 Guardar</button>`;
     }
+    function saveP(idx) { let obj = { nombre: document.getElementById('p-n').value, coste: parseFloat(document.getElementById('p-coste').value || 0), precio: parseFloat(document.getElementById('p-p').value), cat: document.getElementById('p-c').value, stock: parseInt(document.getElementById('p-s').value), minimo: parseInt(document.getElementById('p-m').value) }; if(idx===-1) productos.push(obj); else productos[idx] = obj; guardar(); verInventario(); }
 
-    Function saveP(idx) { let obj = { nombre: document.getElementById(‘p-n’).value, coste: parseFloat(document.getElementById(‘p-coste’).value || 0), precio: parseFloat(document.getElementById(‘p-p’).value), cat: document.getElementById(‘p-c’).value, stock: parseInt(document.getElementById(‘p-s’).value), minimo: parseInt(document.getElementById(‘p-m’).value) }; if(idx===-1) productos.push(obj); else productos[idx] = obj; guardar(); verInventario(); }
-
-
-
-    Function nuevaVenta() {
-
+    function nuevaVenta() {
       cliSel = null; carrito = [];
-
-      let html = `<div class=’lista’><b>👤 CLIENTE:</b><input type=”text” id=”busc-cli-v” placeholder=”🔍 Buscar nombre…” oninput=”filtrarCliVenta()”><select id=”sel-cliente” onchange=”asignarCliVenta()”><option value=””>👤 Consumidor Final</option></select><div id=”info-cli-v” style=”font-size:11px; color:var(--blue); margin-top:5px; font-weight:bold”></div><hr><b>📦 PRODUCTO:</b><input type=”text” placeholder=”🔍 Buscar…” onkeyup=”filtrarP(this.value)”></div><div class=’grid’>`;
-
-      productos.forEach((p, i) => { html += `<div class=’card card-prod’ data-nombre=’${p.nombre}’ onclick=’preguntarCantidad(${i})’><b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br><small>Stock: ${p.stock}</small></div>`; });
-
-      document.getElementById(“app”).innerHTML = html + “</div><div id=’lista-carrito’></div>”;
-
+      let html = `<div class='lista'><b>👤 CLIENTE:</b><input type="text" id="busc-cli-v" placeholder="🔍 Buscar nombre…" oninput="filtrarCliVenta()"><select id="sel-cliente" onchange="asignarCliVenta()"><option value="">👤 Consumidor Final</option></select><div id="info-cli-v" style="font-size:11px; color:var(--blue); margin-top:5px; font-weight:bold"></div><hr><b>📦 PRODUCTO:</b><input type="text" placeholder="🔍 Buscar…" onkeyup="filtrarP(this.value)"></div><div class='grid'>`;
+      productos.forEach((p, i) => { html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'><b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br><small>Stock: ${p.stock}</small></div>`; });
+      document.getElementById("app").innerHTML = html + "</div><div id='lista-carrito'></div>";
       filtrarCliVenta(); actualizarCarrito();
-
     }
 
-
-
-    Function filtrarCliVenta() {
-
-        Const val = document.getElementById(“busc-cli-v”).value.toLowerCase();
-
-        Const sel = document.getElementById(“sel-cliente”);
-
-        Sel.innerHTML = ‘<option value=””>👤 Consumidor Final</option>’;
-
-        Clientes.forEach((c, i) => { if(c.nombre.toLowerCase().includes(val)) { let opt = document.createElement(“option”); opt.value = i; opt.textContent = c.nombre; sel.appendChild(opt); } });
-
+    function filtrarCliVenta() {
+        const val = document.getElementById("busc-cli-v").value.toLowerCase();
+        const sel = document.getElementById("sel-cliente");
+        sel.innerHTML = '<option value="">👤 Consumidor Final</option>';
+        clientes.forEach((c, i) => { if(c.nombre.toLowerCase().includes(val)) { let opt = document.createElement("option"); opt.value = i; opt.textContent = c.nombre; sel.appendChild(opt); } });
         asignarCliVenta();
-
     }
 
-
-
-    Function asignarCliVenta() {
-
-        Const idx = document.getElementById(“sel-cliente”).value;
-
-        Const infoDiv = document.getElementById(“info-cli-v”);
-
-        If(idx ¡== “”) { cliSel = clientes[idx]; infoDiv.innerHTML = `📞 ${cliSel.tel || ‘N/A’} | 🏠 ${cliSel.dir || ‘Sin dirección’}`; }
-
-        Else { cliSel = null; infoDiv.innerHTML = “”; }
-
+    function asignarCliVenta() {
+        const idx = document.getElementById("sel-cliente").value;
+        const infoDiv = document.getElementById("info-cli-v");
+        if(idx !== "") { cliSel = clientes[idx]; infoDiv.innerHTML = `📞 ${cliSel.tel || 'N/A'} | 🏠 ${cliSel.dir || 'Sin dirección'}`; }
+        else { cliSel = null; infoDiv.innerHTML = ""; }
     }
 
+    function filtrarP(v) { document.querySelectorAll(".card-prod").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
 
-
-    Function filtrarP(v) { document.querySelectorAll(“.card-prod”).forEach(c => c.style.display = c.getAttribute(“data-nombre”).toLowerCase().includes(v.toLowerCase()) ¿ “block” : “none”); }
-
-
-
-    Function preguntarCantidad(idx) {
-
-        Let p = productos[idx]; if(p.stock <= 0) return alert(“Sin stock”);
-
-        Let cant = prompt(`Unidades de ${p.nombre}:`, “1”);
-
-        If(¡cant || isNaN(cant) || cant <= 0) return;
-
-        If(parseInt(cant) > p.stock) return alert(“Stock insuficiente”);
-
-        Carrito.push({ idx: idx, nombre: p.nombre, precioUnidad: p.precio, costeUnidad: p.coste || 0, cantidad: parseInt(cant), subtotal: p.precio * parseInt(cant) });
-
+    function preguntarCantidad(idx) {
+        let p = productos[idx]; if(p.stock <= 0) return alert("Sin stock");
+        let cant = prompt(`Unidades de ${p.nombre}:`, "1");
+        if(!cant || isNaN(cant) || cant <= 0) return;
+        if(parseInt(cant) > p.stock) return alert("Stock insuficiente");
+        carrito.push({ idx: idx, nombre: p.nombre, precioUnidad: p.precio, costeUnidad: p.coste || 0, cantidad: parseInt(cant), subtotal: p.precio * parseInt(cant) });
         actualizarCarrito();
-
     }
 
-
-
-    Function actualizarCarrito() {
-
-      Let total = 0; let html = “<div class=’lista’><b>🛒 Detalle:</b>”;
-
-      Carrito.forEach((it, i) => { total += it.subtotal; html += `<div class=’item-pedido’>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick=’carrito.splice(${i},1);actualizarCarrito()’ style=’background:red; color:white; border-radius:50%; width:25px;’>x</button></span></div>`; });
-
-      If(carrito.length > 0) html += `<hr><b>TOTAL: $${total.toLocaleString()}</b><button class=’btn-venta’ onclick=’finalizarVenta(${total}, true)’>💰 COBRAR Y DESCONTAR</button><button onclick=’finalizarVenta(${total}, false)’ style=’background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;’>📄 COTIZAR (SIN DESCONTAR)</button>`;
-
-      Document.getElementById(“lista-carrito”).innerHTML = html;
-
+    function actualizarCarrito() {
+      let total = 0; let html = "<div class='lista'><b>🛒 Detalle:</b>";
+      carrito.forEach((it, i) => { total += it.subtotal; html += `<div class='item-pedido'>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick='carrito.splice(${i},1);actualizarCarrito()' style='background:red; color:white; border-radius:50%; width:25px;'>x</button></span></div>`; });
+      if(carrito.length > 0) html += `<hr><b>TOTAL: $${total.toLocaleString()}</b><button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR Y DESCONTAR</button><button onclick='finalizarVenta(${total}, false)' style='background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;'>📄 COTIZAR (SIN DESCONTAR)</button>`;
+      document.getElementById("lista-carrito").innerHTML = html;
     }
 
-
-
-    Function finalizarVenta(total, esVenta) {
-
-      If(esVenta) {
-
-        Let uTotal = 0;
-
-        Carrito.forEach(item => { productos[item.idx].stock -= item.cantidad; uTotal += (item.precioUnidad – item.costeUnidad) * item.cantidad; });
-
-        historialVentas.push({ fecha: new Date().toLocaleString(), total: total, utilidad: uTotal, cliente: cliSel ¿ cliSel.nombre : “Final” });
-
+    function finalizarVenta(total, esVenta) {
+      if(esVenta) {
+        let uTotal = 0;
+        carrito.forEach(item => { productos[item.idx].stock -= item.cantidad; uTotal += (item.precioUnidad - item.costeUnidad) * item.cantidad; });
+        historialVentas.push({ fecha: new Date().toLocaleString(), total: total, utilidad: uTotal, cliente: cliSel ? cliSel.nombre : "Final" });
       }
-
-      Let titulo = esVenta ¿ “RECIBO” : “COTIZACIÓN”;
-
+      let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
       
-
-      Document.getElementById(“ticket-contenido”).innerHTML = `
-
-        <div style=”text-align:center; margin-bottom:15px;”>
-
-          <b style=”font-size:32px;”>LA BODEGUITA</b><br>
-
-          <span style=”font-size:24px;”>${titulo}</span>
-
+      document.getElementById("ticket-contenido").innerHTML = `
+        <div style="text-align:center; margin-bottom:15px;">
+          <img src="${LOGO_BASE64}" style="width:140px; margin-bottom:10px;">
+          <br><b style="font-size:32px;">LA BODEGUITA</b><br>
+          <span style="font-size:24px;">${titulo}</span>
         </div>
-
-        <div style=”font-size:20px; margin-bottom:10px; border-bottom:3px solid #000; padding-bottom:5px;”>
-
-          CLI: ${cliSel ¿ cliSel.nombre.toUpperCase() : ‘CONSUMIDOR FINAL’}<br>
-
+        <div style="font-size:20px; margin-bottom:10px; border-bottom:3px solid #000; padding-bottom:5px;">
+          CLI: ${cliSel ? cliSel.nombre.toUpperCase() : 'CONSUMIDOR FINAL'}<br>
           FEC: ${new Date().toLocaleString()}
-
         </div>
-
-        <div style=”margin-bottom:10px;”>
-
-          ${carrito.map(i => `<div style=”display:flex; justify-content:space-between; margin-bottom:8px;”><span style=”max-width:70%”>${i.cantidad} ${i.nombre.toUpperCase()}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join(“”)}
-
+        <div style="margin-bottom:10px;">
+          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="max-width:70%">${i.cantidad} ${i.nombre.toUpperCase()}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
         </div>
-
-        <div style=”border-top:3px solid #000; margin-top:5px; padding-top:10px; text-align:right;”>
-
-          <b style=”font-size:30px;”>TOTAL: $${total.toLocaleString()}</b>
-
+        <div style="border-top:3px solid #000; margin-top:5px; padding-top:10px; text-align:right;">
+          <b style="font-size:30px;">TOTAL: $${total.toLocaleString()}</b>
         </div>
-
-        <div style=”text-align:center; margin-top:30px; font-size:18px;”>¡GRACIAS POR SU COMPRA!</div>`;
-
+        <div style="text-align:center; margin-top:30px; font-size:18px;">¡GRACIAS POR SU COMPRA!</div>`;
       
-
-      Document.getElementById(“ticket-wrapper”).style.display = “flex”;
-
-      Guardar();
-
-
+      document.getElementById("ticket-wrapper").style.display = "flex";
+      guardar();
 
       setTimeout(() => {
-
-        html2canvas(document.getElementById(“ticket-visual”), { scale: 3 }).then(canvas => {
-
-          let link = document.createElement(‘a’); 
-
+        html2canvas(document.getElementById("ticket-visual"), { scale: 3 }).then(canvas => {
+          let link = document.createElement('a'); 
           link.download = `${titulo}_${Date.now()}.png`; 
-
-          link.href = canvas.toDataURL(“image/png”); 
-
+          link.href = canvas.toDataURL("image/png"); 
           link.click();
-
         });
-
       }, 500);
-
     }
 
+    function imprimirTicket() { window.print(); }
+    function cerrarTicket() { document.getElementById('ticket-wrapper').style.display = 'none'; nuevaVenta(); }
 
-
-    Function imprimirTicket() { window.print(); }
-
-
-
-    Function cerrarTicket() {
-
-        Document.getElementById(‘ticket-wrapper’).style.display = ‘none’;
-
-        nuevaVenta();
-
-    }
-
-
-
-    Function verConfig() {
-
-      Let tV = 0, tU = 0;
-
+    function verConfig() {
+      let tV = 0, tU = 0;
       historialVentas.forEach(v => { tV += v.total; tU += (v.utilidad || 0); });
-
-      document.getElementById(“app”).innerHTML = `<h3>📊 Reporte</h3><div class=’lista’><h4>VENTAS: $${tV.toLocaleString()}</h4><h4 style=”color:var(--success)”>GANANCIA: $${tU.toLocaleString()}</h4><hr><button onclick=”exportarDatos()” style=”background:#2d3436;width:100%”>📥 Exportar Backup</button><br><br><input type=”file” onchange=”importarDatos(event)”></div>`;
-
+      document.getElementById("app").innerHTML = `<h3>📊 Reporte</h3><div class='lista'><h4>VENTAS: $${tV.toLocaleString()}</h4><h4 style="color:var(--success)">GANANCIA: $${tU.toLocaleString()}</h4><hr><button onclick="exportarDatos()" style="background:#2d3436;width:100%">📥 Exportar Backup</button><br><br><input type="file" onchange="importarDatos(event)"></div>`;
     }
 
-
-
-    Function exportarDatos() { 
-
-        Const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:”application/json”}); 
-
-        Const a = document.createElement(“a”); a.href = URL.createObjectURL(blob); a.download = `Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); 
-
-        ultimoBackup = Date.now(); localStorage.setItem(“lb_last_backup”, ultimoBackup); verificarAlertaBackup(); alert(“Backup re readAsText alizado.”);
-
+    function exportarDatos() { 
+        const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"}); 
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); 
+        ultimoBackup = Date.now(); localStorage.setItem("lb_last_backup", ultimoBackup); verificarAlertaBackup(); alert("Backup realizado.");
     }
 
-
-
-    Function importarDatos€ { const reader = new FileReader(); reader.onload = (ev) => { const d = JSON.parse(ev.target.result); productos = d.productos; clientes = d.clientes; categorias = d.categorias; historialVentas = d.historialVentas; guardar(); location.reload(); }; reader. (e.target.files[0]); }
-
-
+    function importarDatos(event) { 
+        const reader = new FileReader(); 
+        reader.onload = (ev) => { 
+            const d = JSON.parse(ev.target.result); 
+            productos = d.productos; clientes = d.clientes; categorias = d.categorias; historialVentas = d.historialVentas; 
+            guardar(); location.reload(); 
+        }; 
+        reader.readAsText(event.target.files[0]); 
+    }
 
     chequearAcceso();
-
   </script> 
-
 </body> 
-
 </html>
-
-
-
