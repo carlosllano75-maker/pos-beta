@@ -3,504 +3,338 @@
 <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> 
-  <title>Casa Gourmet POS Pro</title>
-  
-  <meta name="theme-color" content="#d4af37">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-  <link rel="icon" href="logo-casa-gourmet.jpg">
-  <link rel="apple-touch-icon" href="logo-casa-gourmet.jpg">
-  <link rel="manifest" href="manifest.json">
- 
-  <script src="html2canvas.min.js"></script>
- 
+  <title>LA BODEGUITA PRO - Multi-Venta</title>
+  <meta name="theme-color" content="#2c3e50">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
   <style> 
-    body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding-bottom:50px;user-select:none;} 
-    header{background:#111;padding:20px 10px;text-align:center;border-bottom:2px solid #d4af37} 
-    .logo{max-height:80px;filter: drop-shadow(0 0 5px rgba(212,175,55,0.3))} 
-    .grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;padding:15px} 
-    .card{background:#1a1a1a;border-radius:15px;padding:15px;text-align:center;border:1px solid #333;box-shadow: 0 4px 6px rgba(0,0,0,0.3)} 
-    .card:active{transform: scale(0.98);background:#222}
-    button{padding:12px 18px;border:none;border-radius:10px;background:#d4af37;color:#000;font-weight:bold;margin:5px;cursor:pointer;transition:0.2s} 
-    button:active{opacity:0.7}
-    .btn-danger{background:#ff4444 !important;color:#fff;padding:5px 10px}
-    .btn-edit{background:#3498db !important;color:#fff;padding:5px 10px}
-    .btn-obs{background:#f39c12 !important;color:#fff;padding:5px 10px}
-    .lista{background:#111;padding:15px;border-radius:15px;margin:15px;border-left:4px solid #d4af37} 
-    select, input{padding:12px;border-radius:10px;margin:8px 0;background:#222;color:#fff;border:1px solid #444;width:80%;max-width:300px}
-    h3{color:#d4af37;margin-top:20px}
-    #app{padding:10px;text-align:center}
-    .item-pedido{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px dashed #333;padding-bottom:5px}
-    .backup-box{background:#222; padding:15px; border-radius:15px; margin:15px auto; max-width:400px; border:1px dashed #444}
+    :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --bg: #f4f7f6; --blue: #3498db; --warning: #f39c12; --danger: #e74c3c; }
+    body{font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:#333; margin:0; padding-bottom:60px;} 
+    header{background: linear-gradient(135deg, var(--primary) 0%, #000 100%); padding:15px; text-align:center; color:white; border-bottom:4px solid var(--accent); position: sticky; top:0; z-index:1000;} 
+    .alerta-backup { background: var(--warning); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; display: none; }
+    .menu-superior{display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; background:#ecf0f1; padding:10px;}
+    .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; padding:10px} 
+    .card{background:white; border-radius:10px; padding:12px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;} 
+    .stock-bajo { border: 2px solid var(--danger) !important; background: #fff5f5; }
+    .aviso-reponer { color: var(--danger); font-size: 10px; font-weight: bold; display: block; }
+    button{padding:10px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:bold; cursor:pointer;} 
+    .btn-venta{background:var(--success); width:95%; margin:10px auto; display:block; font-size:1.1em; padding:15px;}
+    .lista{background:white; padding:15px; border-radius:12px; margin:10px; border:1px solid #ddd;} 
+    .item-pedido{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; border-bottom:1px solid #eee; padding:5px 0}
+    input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
+    .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
+    .excel-tools { background: #e8f4fd; padding: 10px; border-radius: 10px; margin: 10px; display: flex; gap: 5px; justify-content: center; border: 1px solid #3498db; }
+    #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y:auto;}
+    .ticket-termico { width:280px; background:white; color:black; padding:20px; font-family:monospace; font-size:12px; }
     
-    #ticket-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; justify-content: center; align-items: center; }
-    .ticket-termico { width: 240px; background: white; color: black; padding: 20px; font-family: 'Courier New', Courier, monospace; text-align: center; }
-    .sep { border-top: 1px dashed #000; margin: 10px 0; }
- 
-    #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0b0b; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   </style> 
 </head> 
 <body> 
- 
-  <div id="ticket-wrapper">
-    <div id="ticket-visual" class="ticket-termico">
-      <img src="logo-casa-gourmet.jpg" style="width: 220px; margin-bottom: 15px;"><br>
-      <b style="font-size: 24px;">CASA GOURMET</b><br>
-      <b id="t-mesa" style="font-size:26px;"></b><br>
-      <span id="t-fecha" style="font-size:18px; font-weight:bold;"></span><br>
-      <div class="sep"></div>
-      <div id="t-items" style="text-align:left; font-size:20px; font-weight:bold;"></div>
-      <div class="sep"></div>
-      <b id="t-total" style="font-size:30px"></b><br><br>
-      <b style="font-size: 24px;">"Esperamos que tu comida haya sido tan buena como tu compañía."</b>
-    </div>
-    <div id="ticket-reporte" class="ticket-termico" style="display:none">
-      <img src="logo-casa-gourmet.jpg" style="width: 120px;"><br>
-      <b style="font-size:20px;">REPORTE DE CIERRE</b><br>
-      <span id="r-fecha" style="font-size: 18px; font-weight: bold;"></span>
-      <div class="sep"></div>
-      <div id="r-items" style="text-align:left; font-size:16px; font-weight:bold;"></div>
-      <div class="sep"></div>
-      <b id="r-total" style="font-size:26px"></b><br>
-      <small id="r-cantidad"></small>
-    </div>
-  </div>
- 
+
+  <div id="ticket-wrapper"><div id="ticket-visual" class="ticket-termico"><div id="ticket-contenido"></div></div></div>
+  
   <div id="bloqueo">
-    <img src="logo-casa-gourmet.jpg" style="width:120px; border-radius:50%; margin-bottom:20px">
-    <h2 style="color:#d4af37">SISTEMA PROTEGIDO</h2>
+    <h2 style="color:white">SISTEMA PROTEGIDO</h2>
     <input type="password" id="passInput" placeholder="Clave de acceso" style="text-align:center"><br>
-    <button onclick="validarLicencia()">Activar Sistema</button>
+    <button onclick="validarLicencia()" style="background:var(--success)">Activar Sistema</button>
   </div>
- 
+
   <div id="contenido-app" style="display:none">
-    <header> 
-      <img src="logo-casa-gourmet.jpg" class="logo"><br> 
-      <b>CASA GOURMET POS PRO</b> 
-    </header> 
+    <header><b>🛠️ LA BODEGUITA PRO</b></header> 
+    <div id="alerta-backup" class="alerta-backup" onclick="verConfig()">⚠️ RECORDATORIO: REALIZAR BACKUP SEMANAL</div>
     
-    <div style="text-align:center;padding:15px;background:#161616"> 
-      <button onclick="verMesas()">🍽️ Mesas</button> 
-      <button onclick="config()" style="background:#444;color:#fff">⚙️ Ajustes</button> 
-    </div> 
-    
+    <div class="menu-superior">
+      <button onclick="verInventario()">📦 Stock</button>
+      <button onclick="verClientes()">👥 Clientes</button>
+      <button onclick="verCategorias()">🏷️ Cats</button>
+      <button onclick="nuevaVenta()" style="background:var(--success); grid-column: span 2;">➕ Vender/Cotizar</button>
+      <button onclick="verConfig()" style="background:#7f8c8d">📊 Reporte</button>
+    </div>
+
     <div id="app"></div> 
   </div>
- 
+
   <script> 
-    const CLAVE_MAESTRA = "GOURMET2024";
-    const DIAS_LICENCIA = 30; // Días que dura el acceso
- 
-    let menu=JSON.parse(localStorage.getItem("menu")||"[]"); 
-    let pedidos=JSON.parse(localStorage.getItem("pedidos")||"{}"); 
-    let categorias=JSON.parse(localStorage.getItem("categorias")||"[]"); 
-    let ventasDia=parseFloat(localStorage.getItem("ventasDia")||"0");
-    let listaMesas=JSON.parse(localStorage.getItem("listaMesas")||"[1,2,3,4,5,6,7,8,9,10,11,12]");
-    let historialVentas=JSON.parse(localStorage.getItem("historialVentas")||"[]");
- 
-    function guardar(){
-      localStorage.setItem("menu",JSON.stringify(menu));
-      localStorage.setItem("pedidos",JSON.stringify(pedidos));
-      localStorage.setItem("categorias",JSON.stringify(categorias));
-      localStorage.setItem("ventasDia",ventasDia.toString());
-      localStorage.setItem("listaMesas",JSON.stringify(listaMesas));
-      localStorage.setItem("historialVentas",JSON.stringify(historialVentas));
+    const CLAVE_MAESTRA = "BODEGUITA2024";
+    const DIAS_LICENCIA = 30;
+
+    let productos = JSON.parse(localStorage.getItem("lb_prods") || "[]");
+    let clientes = JSON.parse(localStorage.getItem("lb_clientes") || "[]");
+    let categorias = JSON.parse(localStorage.getItem("lb_cats") || '["General"]');
+    let historialVentas = JSON.parse(localStorage.getItem("lb_historial") || "[]");
+    let ultimoBackup = localStorage.getItem("lb_last_backup") || Date.now();
+    let carrito = [];
+    let cliSel = null;
+
+    function guardar() {
+      localStorage.setItem("lb_prods", JSON.stringify(productos));
+      localStorage.setItem("lb_clientes", JSON.stringify(clientes));
+      localStorage.setItem("lb_cats", JSON.stringify(categorias));
+      localStorage.setItem("lb_historial", JSON.stringify(historialVentas));
+      verificarAlertaBackup();
     }
- 
+
     function validarLicencia() {
       if(document.getElementById("passInput").value === CLAVE_MAESTRA) {
-        // Al ingresar clave correcta, se calculan 30 días a futuro
         let fechaVencimiento = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
-        localStorage.setItem("licencia_activa", "true");
-        localStorage.setItem("fecha_vencimiento", fechaVencimiento);
-        localStorage.removeItem("ultimo_recordatorio"); // Reseteamos avisos anteriores
+        localStorage.setItem("lb_licencia_activa", "true");
+        localStorage.setItem("lb_fecha_vencimiento", fechaVencimiento);
+        localStorage.removeItem("lb_ultimo_recordatorio");
         chequearAcceso();
       } else { alert("Clave incorrecta"); }
     }
- 
+
     function chequearAcceso() {
-      let activa = localStorage.getItem("licencia_activa");
-      let vencimiento = parseInt(localStorage.getItem("fecha_vencimiento"));
+      let activa = localStorage.getItem("lb_licencia_activa");
+      let vencimiento = parseInt(localStorage.getItem("lb_fecha_vencimiento"));
       let hoy = new Date().getTime();
 
       if(activa === "true" && vencimiento && hoy < vencimiento) {
-        // Calcular cuántos días faltan
         let diasRestantes = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
         
-        // Si faltan 5 días o menos, enviamos aviso diario
         if (diasRestantes <= 5) {
           let fechaHoyStr = new Date().toDateString();
-          let ultimoAviso = localStorage.getItem("ultimo_recordatorio");
+          let ultimoAviso = localStorage.getItem("lb_ultimo_recordatorio");
           
           if (ultimoAviso !== fechaHoyStr) {
             alert("⚠️ AVISO DE SISTEMA: Su licencia vence en " + diasRestantes + " día(s). Por favor renueve el sistema para no perder el acceso.");
-            localStorage.setItem("ultimo_recordatorio", fechaHoyStr);
+            localStorage.setItem("lb_ultimo_recordatorio", fechaHoyStr);
           }
         }
 
         document.getElementById("bloqueo").style.display = "none";
         document.getElementById("contenido-app").style.display = "block";
-        verMesas();
+        verificarAlertaBackup();
+        verInventario();
       } else if (activa === "true" && vencimiento && hoy >= vencimiento) {
-        // La licencia ya caducó
-        localStorage.setItem("licencia_activa", "false");
+        localStorage.setItem("lb_licencia_activa", "false");
         document.getElementById("bloqueo").style.display = "flex";
         document.getElementById("contenido-app").style.display = "none";
         alert("Su licencia ha expirado. Por favor, introduzca una nueva clave de acceso para continuar facturando.");
       } else {
-        // Estado por defecto (no ha ingresado clave)
         document.getElementById("bloqueo").style.display = "flex";
         document.getElementById("contenido-app").style.display = "none";
       }
     }
- 
-    function verMesas(){ 
-      let html="<div style='margin-bottom:10px'><button onclick='agregarNuevaMesa()' style='background:#28a745; color:white; width:90%'>+ Nueva Mesa / Barra</button></div>";
-      html+="<div class='grid'>"; 
-      listaMesas.forEach(i => { 
-        let total=0; 
-        if(pedidos[i]) pedidos[i].forEach(p => total += (p.precio * (p.cantidad || 1))); 
-        let colorMesa = total > 0 ? "border:1px solid #d4af37; background:#252115" : "";
-        html+=`<div class='card' style='${colorMesa}'><b>Mesa ${i}</b><br><span style='color:${total>0?"#0f0":"#666"}'>$${total}</span> 
-        <br><button onclick='abrirMesa("${i}")'>${total>0?"Editar":"Abrir"}</button></div>`; 
-      }); 
-      html+="</div>"; document.getElementById("app").innerHTML=html; 
-    } 
- 
-    function config(){ 
-      let html="<h3>Ajustes de Sistema</h3>";
-      html+=`<div class="backup-box" style="border-color:#d4af37">
-        <small style="color:#d4af37">VENTAS ACUMULADAS</small><br>
-        <b style="font-size:24px">$${ventasDia}</b><br>
-        <button onclick="imprimirReporte()" style="background:#28a745; color:white; margin-top:10px">🖨️ Reporte del Día</button>
-        <br><button onclick="reiniciarCaja()" style="background:#222; color:#ff4444; font-size:11px; margin-top:10px">Limpiar Todo</button>
-      </div>`;
-      html+="<button onclick='verHistorial()'>🕒 Ver Historial</button>";
-      html+="<br><button onclick='nuevoProducto()'>+ Nuevo Producto</button>";
-      html+=" <button onclick='configCategorias()'>📂 Categorías</button>";
-      html+=" <button onclick='configMesas()'>🍽️ Editar Mesas</button>";
-      html += `<div class="backup-box"><button onclick="exportarMenu()">📤 Exportar</button> <button onclick="importarMenu()">📥 Importar</button></div>`;
-      
-      html+="<hr style='border:1px solid #333; margin:20px'><h3>📦 Gestionar Productos</h3>";
-      if(menu.length === 0) html+="<p>No hay productos guardados.</p>";
-      menu.forEach((p, index) => {
-        html += `<div class='card' style='margin:10px auto; max-width:400px; display:flex; justify-content:space-between; align-items:center'>
-          <div style='text-align:left'><b>${p.nombre}</b><br><small>$${p.precio} (${p.categoria})</small></div>
-          <div>
-            <button class='btn-edit' onclick='editarProducto(${index})'>✏️</button>
-            <button class='btn-danger' onclick='eliminarProducto(${index})'>🗑️</button>
-          </div>
+
+    function verificarAlertaBackup() {
+      const sieteDias = 7 * 24 * 60 * 60 * 1000;
+      const alerta = document.getElementById("alerta-backup");
+      if(alerta) alerta.style.display = (Date.now() - ultimoBackup > sieteDias) ? "block" : "none";
+    }
+
+    // --- FUNCIONES EXCEL ---
+    function exportarExcel() {
+        if(productos.length === 0) return alert("No hay productos.");
+        const ws = XLSX.utils.json_to_sheet(productos.map(p => ({
+            NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+        XLSX.writeFile(wb, "Inventario_Bodeguita.xlsx");
+    }
+
+    function importarExcel(e) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            if(confirm(`¿Cargar ${excelData.length} productos?`)) {
+                productos = excelData.map(row => ({
+                    nombre: row.NOMBRE || row.Nombre || "Sin nombre",
+                    coste: parseFloat(row.COSTE || row.Coste || 0),
+                    precio: parseFloat(row.PRECIO || row.Precio || row.PEECIO || 0),
+                    cat: row.CATEGORIA || row.Categoria || "General",
+                    stock: parseInt(row.STOCK || row.Stock || 0),
+                    minimo: parseInt(row.MINIMO || row.Minimo || 10)
+                }));
+                guardar(); verInventario();
+            }
+        };
+        reader.readAsBinaryString(e.target.files[0]);
+    }
+
+    // --- MÓDULO CATEGORÍAS ---
+    function verCategorias() {
+      let html = "<h3>🏷️ Categorías</h3><input type='text' id='nueva-cat' placeholder='Nueva categoría'><button onclick='agregarCat()' style='width:100%'>+ Añadir</button><br><br>";
+      categorias.forEach((c, i) => {
+        html += `<div class='lista item-pedido'><span>${c}</span> <button onclick='categorias.splice(${i},1);guardar();verCategorias()' style='background:var(--danger)'>🗑️</button></div>`;
+      });
+      document.getElementById("app").innerHTML = html;
+    }
+    function agregarCat() { let n = document.getElementById("nueva-cat").value; if(n){categorias.push(n); guardar(); verCategorias();} }
+
+    // --- MÓDULO CLIENTES ---
+    function verClientes() {
+      let html = `<h3>👥 Clientes</h3><input type="text" placeholder="🔍 Buscar..." onkeyup="filtrarClientes(this.value)"><button onclick='agregarCliente()' style='width:100%'>+ Nuevo Cliente</button>`;
+      clientes.forEach((c, i) => {
+        html += `<div class='lista cliente-card' data-nombre='${c.nombre}'>
+          <b>${c.nombre}</b><br>📞 ${c.tel}<br>
+          <button onclick='editarCliente(${i})' style='background:var(--blue)'>✏️</button>
+          <button onclick='clientes.splice(${i},1);guardar();verClientes()' style='background:var(--danger)'>🗑️</button>
         </div>`;
       });
-      document.getElementById("app").innerHTML=html; 
+      document.getElementById("app").innerHTML = html;
     }
- 
-    function exportarMenu() {
-        const dataStr = JSON.stringify({ menu, categorias, listaMesas });
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', 'respaldo_casa_gourmet.json');
-        linkElement.click();
+    function filtrarClientes(v) { document.querySelectorAll(".cliente-card").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
+    function agregarCliente() { let n = prompt("Nombre:"); let t = prompt("Tel:"); let d = prompt("Dir:"); if(n){clientes.push({nombre:n, tel:t, dir:d}); guardar(); verClientes();} }
+    function editarCliente(i) {
+        clientes[i].nombre = prompt("Nombre:", clientes[i].nombre);
+        clientes[i].tel = prompt("Tel:", clientes[i].tel);
+        clientes[i].dir = prompt("Dir:", clientes[i].dir);
+        guardar(); verClientes();
     }
- 
-    function importarMenu() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = e => {
-            const reader = new FileReader();
-            reader.onload = ev => {
-                try {
-                    const content = JSON.parse(ev.target.result);
-                    if(content.menu) {
-                        menu = content.menu;
-                        categorias = content.categorias;
-                        if(content.listaMesas) listaMesas = content.listaMesas;
-                        guardar(); config(); alert("✅ Importado");
-                    }
-                } catch(err) { alert("Error al importar"); }
-            };
-            reader.readAsText(e.target.files[0]);
-        }
-        input.click();
-    }
- 
-    function eliminarProducto(index) {
-        if(confirm("¿Eliminar producto?")) { menu.splice(index, 1); guardar(); config(); }
-    }
- 
-    function editarProducto(index) {
-        let p = menu[index];
-        let n = prompt("Nombre del producto:", p.nombre);
-        let pr = prompt("Precio:", p.precio);
-        if(n && pr) { menu[index].nombre = n; menu[index].precio = parseFloat(pr); guardar(); config(); }
-    }
- 
-    function abrirMesa(m){ 
-      let html=`<h3>Mesa ${m}</h3>`; 
-      let cats = [...new Set(menu.map(p=>p.categoria))];
-      html+=`<select onchange='filtrarCategoria("${m}",this.value)' style='width:90%'><option value="">Todo</option>`;
-      cats.forEach(cat=>{ html+=`<option value="${cat}">${cat}</option>`; });
-      html+="</select><div id='productos-container'>"+mostrarProductos(m,"")+"</div>"; 
-      html+=mostrarLista(m); 
-      html+=`<br><button onclick='enviarWhatsApp("${m}")' style='background:#25D366; color:white; width:90%'>📱 WhatsApp</button>`;
-      html+=`<br><button onclick='pagarMesa("${m}")' style='background:#28a745; color:white; width:90%; margin-top:10px'>💰 Cobrar</button>`;
-      html+=`<br><button onclick='verMesas()' style='background:#444; color:white; margin-top:10px'>⬅️ Volver</button>`; 
-      document.getElementById("app").innerHTML=html; 
-    } 
- 
-    function filtrarCategoria(m,cat){ document.getElementById('productos-container').innerHTML = mostrarProductos(m,cat); }
-    function mostrarProductos(m,cat){ 
-      let html="<div class='grid'>"; 
-      menu.filter(p=>!cat || p.categoria===cat).forEach(p=>{
-        html+=`<div class='card' style='padding:10px'>${p.nombre}<br><b>$${p.precio}</b><br><button onclick='agregar("${m}","${p.nombre}",${p.precio})'>➕</button></div>`; 
-      }); 
-      return html + "</div>"; 
-    } 
- 
-    function agregar(m,n,pr){ 
-      if(!pedidos[m]) pedidos[m]=[]; 
-      let existente = pedidos[m].find(p => p.nombre === n);
-      if(existente){ existente.cantidad++; } 
-      else { pedidos[m].push({nombre:n, precio:pr, cantidad:1}); }
-      guardar(); abrirMesa(m); 
-    }
- 
-    function agregarObservacion(m, i) {
-      let obsActual = pedidos[m][i].observacion || "";
-      let nuevaObs = prompt("Observación (Ej: Sin cebolla):", obsActual);
-      if (nuevaObs !== null) {
-        pedidos[m][i].observacion = nuevaObs;
-        guardar();
-        abrirMesa(m);
-      }
-    }
- 
-    function mostrarLista(m){ 
-      let html="<div class='lista'><b>📝 Pedido:</b><br>"; let total=0; 
-      if(pedidos[m]){ 
-        pedidos[m].forEach((p,i)=>{ 
-          let cant = p.cantidad || 1;
-          let subtotal = p.precio * cant;
-          total += subtotal; 
-          let txtObs = p.observacion ? `<br><span style="color:#f39c12;font-size:16px;font-weight:bold;">Nota: ${p.observacion}</span>` : "";
-          
-          html+=`<div class='item-pedido'>
-                    <div style="text-align:left">${cant}x ${p.nombre}${txtObs}</div> 
-                    <div>
-                      $${subtotal} 
-                      <button class='btn-obs' onclick='agregarObservacion("${m}",${i})'>📝</button> 
-                      <button class='btn-danger' onclick='eliminarItem("${m}",${i})'>x</button>
-                    </div>
-                 </div>`; 
-        }); 
-      } 
-      return html + `<br><b>TOTAL: $${total}</b></div>`; 
-    }
- 
-    function eliminarItem(m,i){ 
-      if(pedidos[m][i].cantidad > 1){ pedidos[m][i].cantidad--; }
-      else { pedidos[m].splice(i,1); }
-      guardar(); abrirMesa(m); 
-    }
- 
-    function pagarMesa(m){
-      if(!pedidos[m] || pedidos[m].length === 0) return;
-      if(confirm("¿Cobrar e imprimir ticket?")){
-        let totalMesa = 0, itemsHTML = "", textoDetalles = "";
-        pedidos[m].forEach(p => {
-          let cant = p.cantidad || 1;
-          let subtotal = p.precio * cant;
-          totalMesa += subtotal;
-          
-          itemsHTML += `<div style="display:flex; justify-content:space-between"><span>${cant}x ${p.nombre}</span><span>$${subtotal}</span></div>`;
-          if (p.observacion) {
-            itemsHTML += `<div style="text-align:left; font-size:18px; font-weight:bold; margin-top:-5px; margin-bottom:5px;">* Obs: ${p.observacion}</div>`;
-            textoDetalles += cant + "x " + p.nombre + " (*" + p.observacion + "), ";
-          } else {
-            textoDetalles += cant + "x " + p.nombre + ", ";
-          }
-        });
-        
-        historialVentas.push({ hora: new Date().toLocaleTimeString(), mesa: m, total: totalMesa, detalles: textoDetalles.slice(0, -2) });
-        
-        document.getElementById("t-fecha").innerText = new Date().toLocaleString();
-        document.getElementById("t-mesa").innerText="MESA: "+m;
-        document.getElementById("t-items").innerHTML = itemsHTML;
-        document.getElementById("t-total").innerText = "TOTAL: $" + totalMesa;
-        
-        const wrapper = document.getElementById("ticket-wrapper");
-        document.getElementById("ticket-visual").style.display = "block";
-        document.getElementById("ticket-reporte").style.display = "none";
-        wrapper.style.display = "flex";
- 
-        if (typeof html2canvas !== 'undefined') {
-            html2canvas(document.getElementById("ticket-visual"), { scale: 2 }).then(canvas => {
-                let link = document.createElement('a');
-                link.download = 'Ticket-' + m + '.png';
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-                wrapper.style.display = "none";
-                ventasDia += totalMesa;
-                delete pedidos[m];
-                guardar(); verMesas();
-            }).catch(() => { wrapper.style.display = "none"; ventasDia += totalMesa; delete pedidos[m]; guardar(); verMesas(); });
-        } else {
-            wrapper.style.display = "none"; ventasDia += totalMesa; delete pedidos[m]; guardar(); verMesas();
-        }
-      }
-    }
- 
-    function imprimirReporte() {
-      if(historialVentas.length === 0) return alert("Sin ventas.");
-      let itemsHTML = "";
-      historialVentas.forEach(v => {
-        itemsHTML += `<div style="font-size:16px; border-bottom:1px solid #ddd; padding:5px 0">
-          <b>${v.hora} - Mesa ${v.mesa}</b><br>${v.detalles}<br><b>$${v.total}</b>
+
+    // --- MÓDULO INVENTARIO ---
+    function verInventario() {
+      let html = "<h3>📦 Inventario</h3>";
+      html += `<div class="excel-tools">
+                <button onclick="exportarExcel()" style="background:#27ae60">📗 Exp. Excel</button>
+                <button onclick="document.getElementById('in-ex').click()" style="background:#2980b9">📘 Imp. Excel</button>
+                <input type="file" id="in-ex" style="display:none" onchange="importarExcel(event)">
+              </div>`;
+      html += "<button onclick='abrirFormProducto()' style='width:100%'>+ Nuevo Producto</button><div class='grid'>";
+      productos.forEach((p, i) => {
+        let esBajo = p.stock <= (p.minimo || 10);
+        html += `<div class='card ${esBajo ? 'stock-bajo' : ''}'>
+          ${esBajo ? '<span class="aviso-reponer">⚠️ BAJO STOCK</span>' : ''}
+          <b>${p.nombre}</b><br>
+          <span style="font-size:0.8em; color:#777">Costo: $${(p.coste||0).toLocaleString()}</span><br>
+          <b>Venta: $${p.precio.toLocaleString()}</b><br>
+          <span class='badge'>${p.cat}</span><br>
+          <span style="font-size:0.8em; color:#666">Stock: ${p.stock}</span><br>
+          <button onclick='abrirFormProducto(${i})' style='background:var(--blue); margin-top:5px'>✏️</button>
+          <button onclick='if(confirm("¿Eliminar?")){productos.splice(${i},1);guardar();verInventario()}' style='background:var(--danger); margin-top:5px'>🗑️</button>
         </div>`;
       });
-      document.getElementById("r-fecha").innerText = new Date().toLocaleString();
-      document.getElementById("r-items").innerHTML = itemsHTML;
-      document.getElementById("r-total").innerText = "TOTAL DÍA: $" + ventasDia;
-      document.getElementById("r-cantidad").innerText = "Ventas: " + historialVentas.length;
- 
-      const wrapper = document.getElementById("ticket-wrapper");
-      document.getElementById("ticket-visual").style.display = "none";
-      document.getElementById("ticket-reporte").style.display = "block";
-      wrapper.style.display = "flex";
- 
-      if (typeof html2canvas !== 'undefined') {
-          setTimeout(() => {
-            html2canvas(document.getElementById("ticket-reporte"), {scale: 2}).then(canvas => {
-              let link = document.createElement('a');
-              link.download = 'CIERRE-' + new Date().toLocaleDateString() + '.png';
-              link.href = canvas.toDataURL("image/png");
-              link.click();
-              wrapper.style.display = "none";
-            });
-          }, 500);
-      } else {
-          wrapper.style.display = "none";
-          alert("Librería de impresión no disponible.");
-      }
-    }
- 
-    function configCategorias(){
-      let html="<h3>Categorías</h3><button onclick='nuevaCategoria()'>+ Nueva</button>";
-      categorias.forEach((c,i)=>{ html+=`<div class='card'>${c} <button class='btn-danger' onclick='eliminarCategoria(${i})'>🗑️</button></div>`; });
-      html+="<br><button onclick='config()'>Volver</button>";
-      document.getElementById("app").innerHTML=html;
-    }
-    function nuevaCategoria(){ let c=prompt("Nombre"); if(c && !categorias.includes(c)){ categorias.push(c); guardar(); configCategorias(); } }
-    function eliminarCategoria(i){ if(confirm("¿Eliminar?")){ menu=menu.filter(p=>p.categoria!==categorias[i]); categorias.splice(i,1); guardar(); configCategorias(); } }
-
-    function configMesas() {
-
-      let html="<h3>Editar Mesas</h3>";
-
-      listaMesas.forEach((m, i) => { html += `<div class='card' style='margin:10px auto; max-width:300px; display:flex; justify-content:space-between; align-items:center'><span>Mesa ${m}</span><button class='btn-danger' onclick='eliminarMesa(${i})'>🗑️</button></div>`; });
-
-      html += "<br><button onclick='config()'>Volver</button>";
-
-      document.getElementById("app").innerHTML = html;
-
+      document.getElementById("app").innerHTML = html + "</div>";
     }
 
-    function eliminarMesa(i) { if(confirm("¿Eliminar?")) { listaMesas.splice(i, 1); guardar(); configMesas(); } }
-
-    function agregarNuevaMesa() { let n = prompt("Nombre:"); if(n && !listaMesas.includes(n)) { listaMesas.push(n); guardar(); verMesas(); } }
-
-    function nuevoProducto(){ 
-
-      let html="<h3>Nuevo Producto</h3><input id='prodNombre' placeholder='Nombre'><br><input id='prodPrecio' type='number' placeholder='Precio'><br><select id='prodCategoria'>";
-
-      categorias.forEach(c=>{ html+=`<option value="${c}">${c}</option>`; });
-
-      html+="</select><br><br><button onclick='guardarNuevoProducto()'>✅ Guardar</button> <button onclick='config()' style='background:#444'>Cancelar</button>";
-
-      document.getElementById("app").innerHTML=html;
-
+    function abrirFormProducto(idx = -1) {
+      let p = idx !== -1 ? productos[idx] : {nombre:"", coste:0, precio:"", cat:"General", stock:0, minimo:10};
+      let cats = categorias.map(c => `<option value="${c}" ${p.cat===c?'selected':''}>${c}</option>`).join("");
+      document.getElementById("app").innerHTML = `<h3>${idx!==-1?'Editar':'Nuevo'} Producto</h3>
+        <input id='p-n' placeholder='Nombre' value='${p.nombre}'>
+        <label style="font-size:12px; margin-left:15px">Precio de Costo:</label>
+        <input id='p-coste' type='number' placeholder='Costo' value='${p.coste || 0}'>
+        <label style="font-size:12px; margin-left:15px">Precio de Venta:</label>
+        <input id='p-p' type='number' placeholder='Precio' value='${p.precio}'>
+        <select id='p-c'>${cats}</select>
+        <input id='p-s' type='number' placeholder='Stock' value='${p.stock}'>
+        <input id='p-m' type='number' placeholder='Alerta en:' value='${p.minimo}'>
+        <button onclick='saveP(${idx})' style='width:100%; background:var(--success)'>💾 Guardar</button>
+        <button onclick='verInventario()' style='width:100%; background:#7f8c8d; margin-top:10px'>Volver</button>`;
+    }
+    function saveP(idx) {
+        let obj = { 
+            nombre: document.getElementById('p-n').value, 
+            coste: parseFloat(document.getElementById('p-coste').value || 0),
+            precio: parseFloat(document.getElementById('p-p').value), 
+            cat: document.getElementById('p-c').value, 
+            stock: parseInt(document.getElementById('p-s').value), 
+            minimo: parseInt(document.getElementById('p-m').value) 
+        };
+        if(idx===-1) productos.push(obj); else productos[idx] = obj;
+        guardar(); verInventario();
     }
 
-    function guardarNuevoProducto(){
-
-      let n=document.getElementById("prodNombre").value, pr=document.getElementById("prodPrecio").value, c=document.getElementById("prodCategoria")?.value;
-
-      if(n && pr && c){ menu.push({nombre:n,precio:parseFloat(pr),categoria:c, cantidad:1}); guardar(); config(); }
-
-    }
-
-    function reiniciarCaja(){ if(confirm("¿Limpiar historial?")){ ventasDia = 0; historialVentas = []; guardar(); config(); } }
-
-    function verHistorial() {
-
-      let html="<h3>Historial de Hoy</h3>";
-
-      historialVentas.slice().reverse().forEach(v => {
-
-        html += `<div class='card' style='text-align:left; margin-bottom:10px'><small>${v.hora}</small> | <b>Mesa ${v.mesa}</b><br><small>${v.detalles}</small><br><b style='color:#0f0'>$${v.total}</b></div>`;
-
+    // --- MÓDULO VENTA ---
+    function nuevaVenta() {
+      cliSel = null;
+      let cSelect = clientes.map((c,i) => `<option value="${i}">${c.nombre}</option>`).join("");
+      let html = `<div class='lista'><input type="text" placeholder="🔍 Buscar material..." onkeyup="filtrarP(this.value)">
+          <select id="sel-cliente" onchange="cliSel = clientes[this.value]"><option value="">👤 Consumidor Final</option>${cSelect}</select></div><div class='grid'>`;
+      productos.forEach((p, i) => {
+        html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'>
+          <b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br>
+          <small>Stock: ${p.stock}</small>
+        </div>`;
       });
+      document.getElementById("app").innerHTML = html + "</div><div id='lista-carrito'></div>";
+      actualizarCarrito();
+    }
+    function filtrarP(v) { document.querySelectorAll(".card-prod").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
 
-      html += "<br><button onclick='config()'>Volver</button>";
-
-      document.getElementById("app").innerHTML = html;
-
+    function preguntarCantidad(idx) {
+        let p = productos[idx];
+        if(p.stock <= 0) { alert("¡Sin existencias!"); return; }
+        let cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, "1");
+        if(cant === null || cant === "" || isNaN(cant)) return;
+        cant = parseInt(cant);
+        if(cant > p.stock) { alert(`Error: Solo tienes ${p.stock}.`); return; }
+        if(cant <= 0) return;
+        
+        carrito.push({ idx: idx, nombre: p.nombre, precioUnidad: p.precio, costeUnidad: p.coste || 0, cantidad: cant, subtotal: p.precio * cant });
+        actualizarCarrito();
     }
 
-    
-
-    function enviarWhatsApp(m) {
-
-      if (!pedidos[m]) return;
-
-      let texto = "*CASA GOURMET*\n*Mesa " + m + "*\n\n";
-
+    function actualizarCarrito() {
       let total = 0;
-
-      pedidos[m].forEach(p => { 
-
-        let cant = p.cantidad || 1;
-
-        let subtotal = p.precio * cant;
-
-        let obsTexto = p.observacion ? " (*" + p.observacion + "*)" : "";
-
-        texto += "- " + cant + "x " + p.nombre + obsTexto + ": $" + subtotal + "\n"; 
-
-        total += subtotal; 
-
+      let html = "<div class='lista'><b>🛒 Detalle de Venta:</b>";
+      carrito.forEach((it, i) => {
+        total += it.subtotal;
+        html += `<div class='item-pedido'>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick='carrito.splice(${i},1);actualizarCarrito()' style='background:red'>x</button></span></div>`;
       });
-
-      texto += "\n*TOTAL: $" + total + "*";
-
-      window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(texto), '_blank');
-
+      if(carrito.length > 0) {
+        html += `<hr><b>TOTAL: $${total.toLocaleString()}</b>
+          <button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR Y DESCONTAR STOCK</button>
+          <button onclick='finalizarVenta(${total}, false)' style='background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;'>📄 SOLO COTIZAR</button>`;
+      }
+      document.getElementById("lista-carrito").innerHTML = html;
     }
 
- 
-
-    if ('serviceWorker' in navigator) {
-
-      window.addEventListener('load', () => {
-
-        navigator.serviceWorker.register('./sw.js').then(reg => console.log('Offline OK')).catch(err => console.log('Offline Error'));
-
-      });
-
+    function finalizarVenta(total, esVenta) {
+      let utilidadVenta = 0;
+      if(esVenta) {
+        carrito.forEach(item => { 
+            productos[item.idx].stock -= item.cantidad; 
+            utilidadVenta += (item.precioUnidad - item.costeUnidad) * item.cantidad;
+        });
+        historialVentas.push({ fecha: new Date().toLocaleString(), total: total, utilidad: utilidadVenta, cliente: cliSel ? cliSel.nombre : "Final" });
+      }
+      let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
+      let itemsH = carrito.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.cantidad} ${i.nombre}</span><span>$${i.subtotal}</span></div>`).join("");
+      document.getElementById("ticket-contenido").innerHTML = `<div style="text-align:center"><h2>LA BODEGUITA</h2><h3>${titulo}</h3></div><p style="font-size:10px">${cliSel?cliSel.nombre:'C. Final'}<br>${new Date().toLocaleString()}</p><hr>${itemsH}<hr><h3 style="text-align:right">TOTAL: $${total}</h3>`;
+      document.getElementById("ticket-wrapper").style.display = "flex";
+      setTimeout(() => {
+        html2canvas(document.getElementById("ticket-visual")).then(canvas => {
+          let link = document.createElement('a'); link.download = `${titulo}_${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
+          guardar(); carrito = []; document.getElementById("ticket-wrapper").style.display = "none"; nuevaVenta();
+        });
+      }, 500);
     }
 
- 
+    function verConfig() {
+      let totalV = 0;
+      let totalU = 0;
+      let html = "<h3>📊 Reporte</h3><div class='lista'>";
+      historialVentas.forEach(v => { 
+          totalV += v.total; 
+          totalU += (v.utilidad || 0);
+          html += `<div style='font-size:11px;border-bottom:1px solid #eee; padding:5px 0'>
+                    ${v.fecha} - ${v.cliente} <br> 
+                    <b>Venta: $${v.total.toLocaleString()}</b> | 
+                    <span style="color:var(--success)">Utilidad: $${(v.utilidad || 0).toLocaleString()}</span>
+                  </div>`; 
+      });
+      html += `<div style="background:#eee; padding:10px; border-radius:10px; margin-top:10px">
+                <h4>VENTAS: $${totalV.toLocaleString()}</h4>
+                <h4 style="color:var(--success)">GANANCIA REAL: $${totalU.toLocaleString()}</h4>
+              </div>
+              <button onclick="exportarDatos()" style="background:#2d3436;width:100%; margin-top:10px">📥 Exportar Backup (JSON)</button>
+              <br><br><input type="file" onchange="importarDatos(event)"><br>
+              <button onclick="if(confirm('¿Borrar historial?')){historialVentas=[];guardar();verConfig()}" style="background:red;width:100%; margin-top:10px">Limpiar Reporte</button></div>`;
+      document.getElementById("app").innerHTML = html;
+    }
 
+    function exportarDatos() { const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Bodeguita_Backup.json`; a.click(); ultimoBackup = Date.now(); localStorage.setItem("lb_last_backup", ultimoBackup); verificarAlertaBackup(); }
+    function importarDatos(e) { const reader = new FileReader(); reader.onload = (ev) => { const d = JSON.parse(ev.target.result); productos = d.productos; clientes = d.clientes; categorias = d.categorias; historialVentas = d.historialVentas; guardar(); location.reload(); }; reader.readAsText(e.target.files[0]); }
+
+    // Inicializar comprobando la licencia
     chequearAcceso();
-
   </script> 
-
 </body> 
-
 </html>
-
-
-      
