@@ -15,16 +15,14 @@
     header{background: linear-gradient(135deg, var(--primary) 0%, #000 100%); padding:15px; text-align:center; color:white; border-bottom:4px solid var(--accent); position: sticky; top:0; z-index:1000;} 
     .menu-superior{display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; background:#ecf0f1; padding:10px;}
     .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; padding:10px} 
-    .card{background:white; border-radius:10px; padding:12px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative;} 
+    .card{background:white; border-radius:10px; padding:12px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;} 
     .stock-bajo { border: 2px solid var(--danger) !important; background: #fff5f5; }
-    .aviso-reponer { color: var(--danger); font-size: 10px; font-weight: bold; display: block; margin-bottom: 5px; }
     button{padding:10px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:bold; cursor:pointer;} 
     .lista{background:white; padding:15px; border-radius:12px; margin:10px; border:1px solid #ddd;} 
     input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
-    .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
     .excel-tools { background: #e8f4fd; padding: 10px; border-radius: 10px; margin: 10px; display: flex; gap: 5px; justify-content: center; border: 1px solid #3498db; }
-    #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:2000; }
-    .ticket-termico { width:280px; background:white; padding:20px; font-family:monospace; font-size:12px; }
+    #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:2000; overflow-y:auto; }
+    .ticket-termico { width:280px; background:white; color:black; padding:20px; font-family:monospace; font-size:12px; }
   </style> 
 </head> 
 <body> 
@@ -78,26 +76,35 @@
       reader.readAsBinaryString(e.target.files[0]);
     }
 
+    function exportarExcel() {
+        if(productos.length === 0) return alert("No hay datos");
+        const ws = XLSX.utils.json_to_sheet(productos.map(p => ({
+            NOMBRE: p.nombre, COSTE: p.coste, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+        XLSX.writeFile(wb, "Inventario_Bodeguita.xlsx");
+    }
+
     // --- INVENTARIO ---
     function verInventario() {
       let html = `<div class="excel-tools">
-        <button onclick="document.getElementById('in-ex').click()" style="background:#2980b9">📘 Importar Excel</button>
+        <button onclick="exportarExcel()" style="background:#27ae60">📗 Exp. Excel</button>
+        <button onclick="document.getElementById('in-ex').click()" style="background:#2980b9">📘 Imp. Excel</button>
         <input type="file" id="in-ex" style="display:none" onchange="importarExcel(event)">
       </div>
-      <button onclick="abrirFormProducto()" style="width:95%; display:block; margin:10px auto">+ Nuevo Producto</button>
+      <button onclick="abrirFormProducto()" style="width:95%; display:block; margin:10px auto">+ Nuevo Producto Manual</button>
       <div class="grid">`;
       
       productos.forEach((p, i) => {
         let esBajo = p.stock <= (p.minimo || 10);
         html += `<div class="card ${esBajo ? 'stock-bajo' : ''}">
-          ${esBajo ? '<span class="aviso-reponer">⚠️ STOCK BAJO</span>' : ''}
           <b>${p.nombre}</b><br>
           <small>Costo: $${(p.coste||0).toLocaleString()}</small><br>
           <b style="color:var(--success)">Venta: $${(p.precio||0).toLocaleString()}</b><br>
-          <span class="badge">${p.cat}</span><br>
           <small>Stock: ${p.stock}</small><br>
           <button onclick="abrirFormProducto(${i})" style="background:var(--blue); margin-top:5px">✏️</button>
-          <button onclick="productos.splice(${i},1);guardar();verInventario()" style="background:var(--danger)">🗑️</button>
+          <button onclick="if(confirm('¿Eliminar?')){productos.splice(${i},1);guardar();verInventario()}" style="background:var(--danger)">🗑️</button>
         </div>`;
       });
       document.getElementById("app").innerHTML = html + "</div>";
@@ -107,22 +114,22 @@
       let p = idx !== -1 ? productos[idx] : {nombre:"", coste:0, precio:0, cat:"General", stock:0, minimo:10};
       document.getElementById("app").innerHTML = `<div class="lista">
         <h3>${idx!==-1?'Editar':'Nuevo'} Producto</h3>
-        <input id="p-n" placeholder="Nombre" value="${p.nombre}">
-        <input id="p-co" type="number" placeholder="Costo" value="${p.coste}">
-        <input id="p-pr" type="number" placeholder="Precio Venta" value="${p.precio}">
-        <input id="p-s" type="number" placeholder="Stock" value="${p.stock}">
-        <button onclick="saveP(${idx})" style="width:100%; background:var(--success)">💾 Guardar</button>
-        <button onclick="verInventario()" style="width:100%; background:#7f8c8d; margin-top:5px">Volver</button>
+        <label>Nombre:</label><input id="p-n" value="${p.nombre}">
+        <label>Costo (Compra):</label><input id="p-co" type="number" value="${p.coste}">
+        <label>Precio (Venta):</label><input id="p-pr" type="number" value="${p.precio}">
+        <label>Stock Actual:</label><input id="p-s" type="number" value="${p.stock}">
+        <button onclick="saveP(${idx})" style="width:100%; background:var(--success); padding:15px">💾 Guardar Cambios</button>
+        <button onclick="verInventario()" style="width:100%; background:#7f8c8d; margin-top:10px">Cancelar</button>
       </div>`;
     }
 
     function saveP(idx) {
       let obj = { 
         nombre: document.getElementById("p-n").value, 
-        coste: parseFloat(document.getElementById("p-co").value), 
-        precio: parseFloat(document.getElementById("p-pr").value), 
+        coste: parseFloat(document.getElementById("p-co").value || 0), 
+        precio: parseFloat(document.getElementById("p-pr").value || 0), 
         cat: "General", 
-        stock: parseInt(document.getElementById("p-s").value), 
+        stock: parseInt(document.getElementById("p-s").value || 0), 
         minimo: 10 
       };
       if(idx === -1) productos.push(obj); else productos[idx] = obj;
@@ -131,7 +138,7 @@
 
     // --- VENTAS ---
     function nuevaVenta() {
-      let html = `<div class="lista"><input type="text" placeholder="🔍 Buscar..." onkeyup="filtrarV(this.value)"></div><div class="grid">`;
+      let html = `<div class="lista"><input type="text" placeholder="🔍 Buscar producto..." onkeyup="filtrarV(this.value)"></div><div class="grid">`;
       productos.forEach((p, i) => {
         html += `<div class="card card-v" data-n="${p.nombre}" onclick="addCart(${i})">
           <b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br><small>Stock: ${p.stock}</small>
@@ -143,9 +150,10 @@
     function filtrarV(v) { document.querySelectorAll(".card-v").forEach(c => c.style.display = c.getAttribute("data-n").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
 
     function addCart(idx) {
-      let cant = prompt("¿Cantidad?", "1");
+      let cant = prompt("¿Cantidad a vender?", "1");
       if(cant > 0) {
         let p = productos[idx];
+        if(p.stock < cant) return alert("Stock insuficiente");
         carrito.push({ nombre: p.nombre, precio: p.precio, coste: p.coste, cant: parseInt(cant), total: p.precio * cant, idx: idx });
         renderCart();
       }
@@ -163,19 +171,46 @@
       });
       if(carrito.length > 0) {
         html += `<hr><b>TOTAL: $${t.toLocaleString()}</b>
-        <button onclick="cobrar(${t})" style="width:100%; background:var(--success); margin-top:10px; padding:15px">💰 COBRAR</button></div>`;
+        <button onclick="cobrar(${t})" style="width:100%; background:var(--success); margin-top:10px; padding:15px">💰 COBRAR E IMPRIMIR</button></div>`;
       }
       document.getElementById("cart").innerHTML = html;
     }
 
     function cobrar(t) {
-      let utilidad = 0;
+      let utilidadTotal = 0;
+      let itemsTicket = "";
+      
       carrito.forEach(i => {
         productos[i.idx].stock -= i.cant;
-        utilidad += (i.precio - i.coste) * i.cant;
+        utilidadTotal += (i.precio - i.coste) * i.cant;
+        itemsTicket += `<div style="display:flex; justify-content:space-between"><span>${i.cant} ${i.nombre}</span><span>$${i.total}</span></div>`;
       });
-      historialVentas.push({ fecha: new Date().toLocaleString(), total: t, utilidad: utilidad });
-      guardar(); carrito = []; alert("Venta Exitosa"); nuevaVenta();
+
+      historialVentas.push({ fecha: new Date().toLocaleString(), total: t, utilidad: utilidadTotal });
+      
+      // Preparar Ticket
+      document.getElementById("ticket-contenido").innerHTML = `
+        <div style="text-align:center"><h2>LA BODEGUITA</h2><p>Ticket de Venta</p></div>
+        <small>${new Date().toLocaleString()}</small><hr>
+        ${itemsTicket}<hr>
+        <h3 style="text-align:right">TOTAL: $${t}</h3>
+        <p style="text-align:center; font-size:10px">¡Gracias por su compra!</p>
+      `;
+      
+      document.getElementById("ticket-wrapper").style.display = "flex";
+      
+      setTimeout(() => {
+        html2canvas(document.getElementById("ticket-visual")).then(canvas => {
+          let link = document.createElement('a');
+          link.download = `Ticket_${Date.now()}.png`;
+          link.href = canvas.toDataURL();
+          link.click();
+          guardar();
+          carrito = [];
+          document.getElementById("ticket-wrapper").style.display = "none";
+          nuevaVenta();
+        });
+      }, 500);
     }
 
     function verConfig() {
@@ -185,14 +220,12 @@
         <h3>📊 Reporte</h3>
         <p>Ventas Totales: <b>$${v.toLocaleString()}</b></p>
         <p style="color:var(--success)">Utilidad Real: <b>$${u.toLocaleString()}</b></p>
-        <button onclick="historialVentas=[];guardar();verConfig()" style="background:var(--danger); width:100%">Limpiar Historial</button>
+        <hr>
+        <button onclick="exportarBackup()" style="background:#2d3436; width:100%">📥 Guardar Backup (JSON)</button>
+        <button onclick="historialVentas=[];guardar();verConfig()" style="background:var(--danger); width:100%; margin-top:10px">Limpiar Historial</button>
       </div>`;
     }
 
-    function verClientes() { document.getElementById("app").innerHTML = "<div class='lista'>Módulo Clientes (Próximamente)</div>"; }
-    function verCategorias() { document.getElementById("app").innerHTML = "<div class='lista'>Módulo Categorías (Próximamente)</div>"; }
-
-    verInventario();
-  </script> 
-</body> 
-</html>
+    function exportarBackup() {
+        const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"});
+    
