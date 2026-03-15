@@ -24,7 +24,7 @@
     input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
     .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
     
-    /* --- AJUSTES DE TICKET (LETRA GRANDE Y NEGRITA) --- */
+    /* AJUSTE DE TICKET LETRA GIGANTE */
     #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:2000; overflow-y:auto;}
     .ticket-termico { 
         width: 56mm; 
@@ -32,11 +32,11 @@
         color:black; 
         padding: 15px 2mm; 
         font-family: 'Courier New', monospace; 
-        font-size: 16px; /* Aumentado de 12px a 16px */
-        font-weight: bold; /* Todo en negrita para mejor lectura térmica */
+        font-size: 22px; /* TEXTO GENERAL MUCHO MÁS GRANDE */
+        font-weight: 900; /* NEGRITA EXTREMA */
         line-height: 1.1; 
     }
-    .ticket-termico b { font-size: 20px; } /* Encabezados y Total más grandes */
+    .ticket-termico b { font-size: 28px; } /* TÍTULOS Y TOTAL GIGANTES */
 
     #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
@@ -233,23 +233,22 @@
       }
       let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
       
-      /* --- TICKET ACTUALIZADO CON LETRA GRANDE --- */
       document.getElementById("ticket-contenido").innerHTML = `
         <div style="text-align:center; margin-bottom:15px;">
-          <b style="font-size:24px;">LA BODEGUITA</b><br>
-          <span style="font-size:18px;">${titulo}</span>
+          <b style="font-size:32px;">LA BODEGUITA</b><br>
+          <span style="font-size:24px;">${titulo}</span>
         </div>
-        <div style="font-size:15px; margin-bottom:10px; border-bottom:2px solid #000; padding-bottom:5px;">
+        <div style="font-size:20px; margin-bottom:10px; border-bottom:3px solid #000; padding-bottom:5px;">
           CLI: ${cliSel ? cliSel.nombre.toUpperCase() : 'CONSUMIDOR FINAL'}<br>
           FEC: ${new Date().toLocaleString()}
         </div>
         <div style="margin-bottom:10px;">
-          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${i.cantidad} ${i.nombre.toUpperCase()}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
+          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="max-width:70%">${i.cantidad} ${i.nombre.toUpperCase()}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
         </div>
-        <div style="border-top:2px solid #000; margin-top:5px; padding-top:10px; text-align:right;">
-          <b style="font-size:22px;">TOTAL: $${total.toLocaleString()}</b>
+        <div style="border-top:3px solid #000; margin-top:5px; padding-top:10px; text-align:right;">
+          <b style="font-size:30px;">TOTAL: $${total.toLocaleString()}</b>
         </div>
-        <div style="text-align:center; margin-top:25px; font-size:14px;">¡GRACIAS POR SU COMPRA!</div>`;
+        <div style="text-align:center; margin-top:30px; font-size:18px;">¡GRACIAS POR SU COMPRA!</div>`;
       
       document.getElementById("ticket-wrapper").style.display = "flex";
       guardar();
@@ -289,4 +288,3 @@
   </script> 
 </body> 
 </html>
-
