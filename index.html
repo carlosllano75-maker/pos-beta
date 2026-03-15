@@ -24,20 +24,16 @@
     input, select{padding:12px; border-radius:8px; border:1px solid #ccc; width:92%; margin:8px auto; display:block; font-size:16px;}
     .badge{background:var(--primary); color:white; padding:3px 8px; border-radius:5px; font-size:0.75em;}
     
-    /* CONFIGURACIÓN ESPECIAL DE TICKET */
     #ticket-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:2000; overflow-y:auto;}
-    .ticket-termico { width: 52mm; background:white; color:black; padding: 10px 3mm; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.2; }
-    
+    .ticket-termico { width: 54mm; background:white; color:black; padding: 15px 4mm; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.2; }
     #bloqueo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-    /* AJUSTES PARA IMPRESIÓN SIN MÁRGENES Y UNA SOLA PÁGINA */
     @media print {
       @page { margin: 0; size: auto; }
-      body { margin: 0; background: white; }
+      body { margin: 0; }
       #contenido-app, .no-print, header, .menu-superior { display: none !important; }
       #ticket-wrapper { position: absolute; top:0; left:0; background: white; display: block; width: 100%; }
-      .ticket-termico { width: 100%; box-shadow: none; border: none; padding: 0; margin: 0; }
-      #ticket-visual { width: 100%; }
+      .ticket-termico { width: 100%; border: none; padding: 10px; margin: 0; }
     }
   </style> 
 </head> 
@@ -46,8 +42,8 @@
   <div id="ticket-wrapper">
     <div id="ticket-visual" class="ticket-termico"><div id="ticket-contenido"></div></div>
     <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
-        <button onclick="imprimirTicket()" style="background:var(--success); padding:15px 30px;">🖨️ IMPRIMIR AHORA</button>
-        <button onclick="document.getElementById('ticket-wrapper').style.display='none'; nuevaVenta();" style="background:var(--danger)">❌ CERRAR</button>
+        <button onclick="imprimirTicket()" style="background:var(--success); padding:15px;">🖨️ IMPRIMIR</button>
+        <button onclick="cerrarTicket()" style="background:var(--danger); padding:15px;">❌ CERRAR</button>
     </div>
   </div>
   
@@ -90,24 +86,23 @@
       verificarAlertaBackup();
     }
 
+    // --- LICENCIA ---
     function validarLicencia() {
       if(document.getElementById("passInput").value === CLAVE_MAESTRA) {
-        let fechaVencimiento = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
+        let venc = new Date().getTime() + (DIAS_LICENCIA * 24 * 60 * 60 * 1000);
         localStorage.setItem("lb_licencia_activa", "true");
-        localStorage.setItem("lb_fecha_vencimiento", fechaVencimiento);
+        localStorage.setItem("lb_fecha_vencimiento", venc);
         chequearAcceso();
-      } else { alert("Clave incorrecta"); }
+      } else alert("Clave incorrecta");
     }
 
     function chequearAcceso() {
       let activa = localStorage.getItem("lb_licencia_activa");
       let vencimiento = parseInt(localStorage.getItem("lb_fecha_vencimiento"));
-      let hoy = new Date().getTime();
-      if(activa === "true" && vencimiento && hoy < vencimiento) {
+      if(activa === "true" && vencimiento && new Date().getTime() < vencimiento) {
         document.getElementById("bloqueo").style.display = "none";
         document.getElementById("contenido-app").style.display = "block";
-        verificarAlertaBackup();
-        verInventario();
+        verificarAlertaBackup(); verInventario();
       } else {
         document.getElementById("bloqueo").style.display = "flex";
         document.getElementById("contenido-app").style.display = "none";
@@ -115,14 +110,12 @@
     }
 
     function verificarAlertaBackup() {
-      const sieteDias = 7 * 24 * 60 * 60 * 1000;
       const alerta = document.getElementById("alerta-backup");
-      if(alerta) alerta.style.display = (Date.now() - ultimoBackup > sieteDias) ? "block" : "none";
+      if(alerta) alerta.style.display = (Date.now() - ultimoBackup > 604800000) ? "block" : "none";
     }
 
-    // --- FUNCIONES EXCEL (INTACTAS) ---
+    // --- EXCEL ---
     function exportarExcel() {
-        if(productos.length === 0) return alert("No hay productos.");
         const ws = XLSX.utils.json_to_sheet(productos.map(p => ({ NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo })));
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Inventario");
@@ -182,9 +175,9 @@
     }
     function saveP(idx) { let obj = { nombre: document.getElementById('p-n').value, coste: parseFloat(document.getElementById('p-coste').value || 0), precio: parseFloat(document.getElementById('p-p').value), cat: document.getElementById('p-c').value, stock: parseInt(document.getElementById('p-s').value), minimo: parseInt(document.getElementById('p-m').value) }; if(idx===-1) productos.push(obj); else productos[idx] = obj; guardar(); verInventario(); }
 
-    // --- VENTA (INTACTA) ---
+    // --- VENTA Y CARRITO ---
     function nuevaVenta() {
-      cliSel = null;
+      cliSel = null; carrito = [];
       let html = `<div class='lista'><b>👤 CLIENTE:</b><input type="text" id="busc-cli-v" placeholder="🔍 Buscar nombre..." oninput="filtrarCliVenta()"><select id="sel-cliente" onchange="asignarCliVenta()"><option value="">👤 Consumidor Final</option></select><div id="info-cli-v" style="font-size:11px; color:var(--blue); margin-top:5px; font-weight:bold"></div><hr><b>📦 PRODUCTO:</b><input type="text" placeholder="🔍 Buscar..." onkeyup="filtrarP(this.value)"></div><div class='grid'>`;
       productos.forEach((p, i) => { html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'><b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br><small>Stock: ${p.stock}</small></div>`; });
       document.getElementById("app").innerHTML = html + "</div><div id='lista-carrito'></div>";
@@ -219,12 +212,12 @@
 
     function actualizarCarrito() {
       let total = 0; let html = "<div class='lista'><b>🛒 Detalle:</b>";
-      carrito.forEach((it, i) => { total += it.subtotal; html += `<div class='item-pedido'>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick='carrito.splice(${i},1);actualizarCarrito()' style='background:red'>x</button></span></div>`; });
-      if(carrito.length > 0) html += `<hr><b>TOTAL: $${total.toLocaleString()}</b><button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR</button><button onclick='finalizarVenta(${total}, false)' style='background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;'>📄 COTIZAR</button>`;
+      carrito.forEach((it, i) => { total += it.subtotal; html += `<div class='item-pedido'>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick='carrito.splice(${i},1);actualizarCarrito()' style='background:red; color:white; border-radius:50%; width:25px;'>x</button></span></div>`; });
+      if(carrito.length > 0) html += `<hr><b>TOTAL: $${total.toLocaleString()}</b><button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR Y DESCONTAR</button><button onclick='finalizarVenta(${total}, false)' style='background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;'>📄 COTIZAR (SIN DESCONTAR)</button>`;
       document.getElementById("lista-carrito").innerHTML = html;
     }
 
-    // --- FINALIZAR Y TICKET MEJORADO ---
+    // --- FINALIZAR Y TICKET CON AUTO-DESCARGA ---
     function finalizarVenta(total, esVenta) {
       if(esVenta) {
         let uTotal = 0;
@@ -233,42 +226,45 @@
       }
       let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
       
-      let itemsH = carrito.map(i => `
-        <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
-          <span style="width:75%">${i.cantidad} ${i.nombre}</span>
-          <span style="width:25%; text-align:right">$${i.subtotal.toLocaleString()}</span>
-        </div>`).join("");
-
       document.getElementById("ticket-contenido").innerHTML = `
         <div style="text-align:center; margin-bottom:10px;">
-          <b style="font-size:14px;">LA BODEGUITA</b><br>
+          <b style="font-size:16px;">LA BODEGUITA</b><br>
           <span>${titulo}</span>
         </div>
-        <div style="font-size:10px; margin-bottom:8px;">
+        <div style="font-size:11px; margin-bottom:8px;">
           CLIENTE: ${cliSel ? cliSel.nombre : 'Consumidor Final'}<br>
           FECHA: ${new Date().toLocaleString()}
         </div>
-        <div style="border-top:1px dashed #000; padding-top:5px;">${itemsH}</div>
-        <div style="border-top:1px dashed #000; margin-top:5px; padding-top:5px; text-align:right;">
-          <b style="font-size:13px;">TOTAL: $${total.toLocaleString()}</b>
+        <div style="border-top:1px dashed #000; padding-top:5px;">
+          ${carrito.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${i.cantidad} ${i.nombre}</span><span>$${i.subtotal.toLocaleString()}</span></div>`).join("")}
         </div>
-        <div style="text-align:center; margin-top:15px; font-size:10px;">
-          ¡Gracias por su compra!
-        </div>`;
+        <div style="border-top:1px dashed #000; margin-top:5px; padding-top:5px; text-align:right;">
+          <b style="font-size:14px;">TOTAL: $${total.toLocaleString()}</b>
+        </div>
+        <div style="text-align:center; margin-top:15px; font-size:10px;">¡Gracias por su compra!</div>`;
       
       document.getElementById("ticket-wrapper").style.display = "flex";
       guardar();
+
+      // DESCARGA AUTOMÁTICA DE LA FOTO
+      setTimeout(() => {
+        html2canvas(document.getElementById("ticket-visual"), { scale: 2 }).then(canvas => {
+          let link = document.createElement('a'); 
+          link.download = `${titulo}_${Date.now()}.png`; 
+          link.href = canvas.toDataURL("image/png"); 
+          link.click();
+        });
+      }, 500);
     }
 
-    function imprimirTicket() { 
-        window.print(); 
-        // Después de imprimir, cerramos para evitar confusiones
-        setTimeout(() => {
-            document.getElementById('ticket-wrapper').style.display='none';
-            nuevaVenta();
-        }, 1000);
+    function imprimirTicket() { window.print(); }
+
+    function cerrarTicket() {
+        document.getElementById('ticket-wrapper').style.display = 'none';
+        nuevaVenta(); // Esto reinicia el total y limpia el carrito visualmente
     }
 
+    // --- REPORTES Y BACKUP ---
     function verConfig() {
       let tV = 0, tU = 0;
       historialVentas.forEach(v => { tV += v.total; tU += (v.utilidad || 0); });
