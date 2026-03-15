@@ -245,8 +245,12 @@
     function nuevaVenta() {
       cliSel = null;
       let cSelect = clientes.map((c,i) => `<option value="${i}">${c.nombre}</option>`).join("");
-      let html = `<div class='lista'><input type="text" placeholder="🔍 Buscar material..." onkeyup="filtrarP(this.value)">
-          <select id="sel-cliente" onchange="cliSel = clientes[this.value]"><option value="">👤 Consumidor Final</option>${cSelect}</select></div><div class='grid'>`;
+      let html = `<div class='lista'>
+          <input type="text" placeholder="🔍 Buscar cliente..." onkeyup="filtrarC_venta(this.value)" style="margin-bottom:5px">
+          <select id="sel-cliente" onchange="cliSel = clientes[this.value]"><option value="">👤 Consumidor Final</option>${cSelect}</select>
+          <hr style="border:0;border-top:1px solid #eee;margin:15px 0">
+          <input type="text" placeholder="🔍 Buscar material..." onkeyup="filtrarP(this.value)">
+          </div><div class='grid'>`;
       productos.forEach((p, i) => {
         html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'>
           <b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br>
@@ -256,6 +260,19 @@
       document.getElementById("app").innerHTML = html + "</div><div id='lista-carrito'></div>";
       actualizarCarrito();
     }
+
+    function filtrarC_venta(v) {
+        let filter = v.toLowerCase();
+        let cSelect = "";
+        clientes.forEach((c, i) => {
+            if(c.nombre.toLowerCase().includes(filter)) {
+                cSelect += `<option value="${i}">${c.nombre}</option>`;
+            }
+        });
+        document.getElementById("sel-cliente").innerHTML = `<option value="">👤 Consumidor Final</option>` + cSelect;
+        cliSel = null;
+    }
+
     function filtrarP(v) { document.querySelectorAll(".card-prod").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
 
     function preguntarCantidad(idx) {
@@ -330,7 +347,7 @@
       document.getElementById("app").innerHTML = html;
     }
 
-    function exportarDatos() { const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Bodeguita_Backup.json`; a.click(); ultimoBackup = Date.now(); localStorage.setItem("lb_last_backup", ultimoBackup); verificarAlertaBackup(); }
+    function exportarDatos() { const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Bodeguita_Backup.json`; a.click(); ultimoBackup = Date.now(); localStorage.setItem("lb_last_backup", ultimoBackup);verificarAlertaBackup(); }
     function importarDatos(e) { const reader = new FileReader(); reader.onload = (ev) => { const d = JSON.parse(ev.target.result); productos = d.productos; clientes = d.clientes; categorias = d.categorias; historialVentas = d.historialVentas; guardar(); location.reload(); }; reader.readAsText(e.target.files[0]); }
 
     // Inicializar comprobando la licencia
