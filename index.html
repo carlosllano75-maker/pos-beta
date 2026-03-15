@@ -246,10 +246,11 @@
       cliSel = null;
       let cSelect = clientes.map((c,i) => `<option value="${i}">${c.nombre}</option>`).join("");
       let html = `<div class='lista'>
-          <input type="text" placeholder="🔍 Buscar cliente..." onkeyup="filtrarC_venta(this.value)" style="margin-bottom:5px">
+          <label style="font-size:12px; color:var(--primary); font-weight:bold; margin-left:10px">Buscar Cliente:</label>
+          <input type="text" id="busc-cli" placeholder="Escribe nombre de cliente..." onkeyup="filtrarC_venta(this.value)" style="margin-bottom:5px">
           <select id="sel-cliente" onchange="cliSel = clientes[this.value]"><option value="">👤 Consumidor Final</option>${cSelect}</select>
           <hr style="border:0;border-top:1px solid #eee;margin:15px 0">
-          <input type="text" placeholder="🔍 Buscar material..." onkeyup="filtrarP(this.value)">
+          <input type="text" placeholder="🔍 Buscar material/producto..." onkeyup="filtrarP(this.value)">
           </div><div class='grid'>`;
       productos.forEach((p, i) => {
         html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'>
@@ -263,13 +264,16 @@
 
     function filtrarC_venta(v) {
         let filter = v.toLowerCase();
-        let cSelect = "";
+        let sel = document.getElementById("sel-cliente");
+        let options = `<option value="">👤 Consumidor Final</option>`;
+        
         clientes.forEach((c, i) => {
             if(c.nombre.toLowerCase().includes(filter)) {
-                cSelect += `<option value="${i}">${c.nombre}</option>`;
+                options += `<option value="${i}">${c.nombre}</option>`;
             }
         });
-        document.getElementById("sel-cliente").innerHTML = `<option value="">👤 Consumidor Final</option>` + cSelect;
+        sel.innerHTML = options;
+        // Resetear cliSel para forzar nueva selección del usuario sobre el filtrado
         cliSel = null;
     }
 
