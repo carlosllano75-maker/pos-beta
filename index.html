@@ -12,7 +12,7 @@
     :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --bg: #f4f7f6; --blue: #3498db; --warning: #f39c12; --danger: #e74c3c; }
     body{font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:#333; margin:0; padding-bottom:60px;} 
     header{background: linear-gradient(135deg, var(--primary) 0%, #000 100%); padding:15px; text-align:center; color:white; border-bottom:4px solid var(--accent); position: sticky; top:0; z-index:1000;} 
-    .alerta-backup { background: var(--warning); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; display: none; }
+    .alerta-backup { background: var(--warning); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; display: none; cursor: pointer; }
     .menu-superior{display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; background:#ecf0f1; padding:10px;}
     .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; padding:10px} 
     .card{background:white; border-radius:10px; padding:12px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;} 
@@ -43,7 +43,7 @@
 
   <div id="contenido-app" style="display:none">
     <header><b>🛠️ LA BODEGUITA PRO</b></header> 
-    <div id="alerta-backup" class="alerta-backup" onclick="verConfig()">⚠️ RECORDATORIO: REALIZAR BACKUP SEMANAL</div>
+    <div id="alerta-backup" class="alerta-backup" onclick="exportarDatos()">⚠️ CLICK AQUÍ PARA RESPALDO DE SEGURIDAD (BACKUP)</div>
     
     <div class="menu-superior">
       <button onclick="verInventario()">📦 Stock</button>
@@ -92,30 +92,12 @@
       let hoy = new Date().getTime();
 
       if(activa === "true" && vencimiento && hoy < vencimiento) {
-        let diasRestantes = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
-        
-        if (diasRestantes <= 5) {
-          let fechaHoyStr = new Date().toDateString();
-          let ultimoAviso = localStorage.getItem("lb_ultimo_recordatorio");
-          
-          if (ultimoAviso !== fechaHoyStr) {
-            alert("⚠️ AVISO DE SISTEMA: Su licencia vence en " + diasRestantes + " día(s). Por favor renueve el sistema para no perder el acceso.");
-            localStorage.setItem("lb_ultimo_recordatorio", fechaHoyStr);
-          }
-        }
-
         document.getElementById("bloqueo").style.display = "none";
         document.getElementById("contenido-app").style.display = "block";
         verificarAlertaBackup();
         verInventario();
-      } else if (activa === "true" && vencimiento && hoy >= vencimiento) {
-        localStorage.setItem("lb_licencia_activa", "false");
-        document.getElementById("bloqueo").style.display = "flex";
-        document.getElementById("contenido-app").style.display = "none";
-        alert("Su licencia ha expirado. Por favor, introduzca una nueva clave de acceso para continuar facturando.");
       } else {
         document.getElementById("bloqueo").style.display = "flex";
-        document.getElementById("contenido-app").style.display = "none";
       }
     }
 
@@ -125,36 +107,35 @@
       if(alerta) alerta.style.display = (Date.now() - ultimoBackup > sieteDias) ? "block" : "none";
     }
 
-    // --- FUNCIONES EXCEL ---
-    function exportarExcel() {
-        if(productos.length === 0) return alert("No hay productos.");
-        const ws = XLSX.utils.json_to_sheet(productos.map(p => ({
-            NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo
-        })));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-        XLSX.writeFile(wb, "Inventario_Bodeguita.xlsx");
+    // --- RESPALDO (BACKUP) ---
+    function exportarDatos() { 
+        const data = { productos, clientes, categorias, historialVentas, fecha: new Date().toLocaleDateString() };
+        const blob = new Blob([JSON.stringify(data)], {type:"application/json"}); 
+        const a = document.createElement("a"); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = `BODEGUITA_BACKUP_${new Date().toISOString().slice(0,10)}.json`; 
+        a.click(); 
+        ultimoBackup = Date.now(); 
+        localStorage.setItem("lb_last_backup", ultimoBackup);
+        verificarAlertaBackup();
+        alert("Backup descargado con éxito. Guárdalo en un lugar seguro.");
     }
 
-    function importarExcel(e) {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const data = evt.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            if(confirm(`¿Cargar ${excelData.length} productos?`)) {
-                productos = excelData.map(row => ({
-                    nombre: row.NOMBRE || row.Nombre || "Sin nombre",
-                    coste: parseFloat(row.COSTE || row.Coste || 0),
-                    precio: parseFloat(row.PRECIO || row.Precio || row.PEECIO || 0),
-                    cat: row.CATEGORIA || row.Categoria || "General",
-                    stock: parseInt(row.STOCK || row.Stock || 0),
-                    minimo: parseInt(row.MINIMO || row.Minimo || 10)
-                }));
-                guardar(); verInventario();
-            }
-        };
-        reader.readAsBinaryString(e.target.files[0]);
+    function importarDatos(e) { 
+        const reader = new FileReader(); 
+        reader.onload = (ev) => { 
+            try {
+                const d = JSON.parse(ev.target.result); 
+                productos = d.productos || []; 
+                clientes = d.clientes || []; 
+                categorias = d.categorias || ["General"]; 
+                historialVentas = d.historialVentas || []; 
+                guardar(); 
+                alert("Datos restaurados correctamente.");
+                location.reload(); 
+            } catch(err) { alert("Error al leer el archivo."); }
+        }; 
+        reader.readAsText(e.target.files[0]); 
     }
 
     // --- MÓDULO CATEGORÍAS ---
@@ -169,7 +150,7 @@
 
     // --- MÓDULO CLIENTES ---
     function verClientes() {
-      let html = `<h3>👥 Clientes</h3><input type="text" placeholder="🔍 Buscar..." onkeyup="filtrarClientes(this.value)"><button onclick='agregarCliente()' style='width:100%'>+ Nuevo Cliente</button>`;
+      let html = `<h3>👥 Clientes</h3><input type="text" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes(this.value)"><button onclick='agregarCliente()' style='width:100%'>+ Nuevo Cliente</button>`;
       clientes.forEach((c, i) => {
         html += `<div class='lista cliente-card' data-nombre='${c.nombre}'>
           <b>${c.nombre}</b><br>📞 ${c.tel}<br>
@@ -181,13 +162,7 @@
     }
     function filtrarClientes(v) { document.querySelectorAll(".cliente-card").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
     function agregarCliente() { let n = prompt("Nombre:"); let t = prompt("Tel:"); let d = prompt("Dir:"); if(n){clientes.push({nombre:n, tel:t, dir:d}); guardar(); verClientes();} }
-    function editarCliente(i) {
-        clientes[i].nombre = prompt("Nombre:", clientes[i].nombre);
-        clientes[i].tel = prompt("Tel:", clientes[i].tel);
-        clientes[i].dir = prompt("Dir:", clientes[i].dir);
-        guardar(); verClientes();
-    }
-
+    
     // --- MÓDULO INVENTARIO ---
     function verInventario() {
       let html = "<h3>📦 Inventario</h3>";
@@ -202,7 +177,6 @@
         html += `<div class='card ${esBajo ? 'stock-bajo' : ''}'>
           ${esBajo ? '<span class="aviso-reponer">⚠️ BAJO STOCK</span>' : ''}
           <b>${p.nombre}</b><br>
-          <span style="font-size:0.8em; color:#777">Costo: $${(p.coste||0).toLocaleString()}</span><br>
           <b>Venta: $${p.precio.toLocaleString()}</b><br>
           <span class='badge'>${p.cat}</span><br>
           <span style="font-size:0.8em; color:#666">Stock: ${p.stock}</span><br>
@@ -218,13 +192,11 @@
       let cats = categorias.map(c => `<option value="${c}" ${p.cat===c?'selected':''}>${c}</option>`).join("");
       document.getElementById("app").innerHTML = `<h3>${idx!==-1?'Editar':'Nuevo'} Producto</h3>
         <input id='p-n' placeholder='Nombre' value='${p.nombre}'>
-        <label style="font-size:12px; margin-left:15px">Precio de Costo:</label>
         <input id='p-coste' type='number' placeholder='Costo' value='${p.coste || 0}'>
-        <label style="font-size:12px; margin-left:15px">Precio de Venta:</label>
-        <input id='p-p' type='number' placeholder='Precio' value='${p.precio}'>
+        <input id='p-p' type='number' placeholder='Precio Venta' value='${p.precio}'>
         <select id='p-c'>${cats}</select>
         <input id='p-s' type='number' placeholder='Stock' value='${p.stock}'>
-        <input id='p-m' type='number' placeholder='Alerta en:' value='${p.minimo}'>
+        <input id='p-m' type='number' placeholder='Alerta Stock Bajo en:' value='${p.minimo}'>
         <button onclick='saveP(${idx})' style='width:100%; background:var(--success)'>💾 Guardar</button>
         <button onclick='verInventario()' style='width:100%; background:#7f8c8d; margin-top:10px'>Volver</button>`;
     }
@@ -241,17 +213,20 @@
         guardar(); verInventario();
     }
 
-    // --- MÓDULO VENTA ---
+    // --- MÓDULO VENTA CON BUSCADOR DE CLIENTES ---
     function nuevaVenta() {
       cliSel = null;
-      let cSelect = clientes.map((c,i) => `<option value="${i}">${c.nombre}</option>`).join("");
       let html = `<div class='lista'>
-          <label style="font-size:12px; color:var(--primary); font-weight:bold; margin-left:10px">Buscar Cliente:</label>
-          <input type="text" id="busc-cli" placeholder="Escribe nombre de cliente..." onkeyup="filtrarC_venta(this.value)" style="margin-bottom:5px">
-          <select id="sel-cliente" onchange="cliSel = clientes[this.value]"><option value="">👤 Consumidor Final</option>${cSelect}</select>
-          <hr style="border:0;border-top:1px solid #eee;margin:15px 0">
-          <input type="text" placeholder="🔍 Buscar material/producto..." onkeyup="filtrarP(this.value)">
+          <b>👤 SELECCIONAR CLIENTE:</b>
+          <input type="text" id="input-busc-cliente" placeholder="🔍 Escribe nombre de cliente..." oninput="ejecutarFiltroCliente()">
+          <select id="sel-cliente" onchange="seleccionarClienteDeLista()">
+            <option value="">-- Consumidor Final --</option>
+          </select>
+          <hr>
+          <b>📦 AGREGAR PRODUCTOS:</b>
+          <input type="text" placeholder="🔍 Buscar producto..." onkeyup="filtrarP(this.value)">
           </div><div class='grid'>`;
+      
       productos.forEach((p, i) => {
         html += `<div class='card card-prod' data-nombre='${p.nombre}' onclick='preguntarCantidad(${i})'>
           <b>${p.nombre}</b><br>$${p.precio.toLocaleString()}<br>
@@ -259,22 +234,36 @@
         </div>`;
       });
       document.getElementById("app").innerHTML = html + "</div><div id='lista-carrito'></div>";
+      
+      // Cargar lista inicial de clientes
+      ejecutarFiltroCliente();
       actualizarCarrito();
     }
 
-    function filtrarC_venta(v) {
-        let filter = v.toLowerCase();
-        let sel = document.getElementById("sel-cliente");
-        let options = `<option value="">👤 Consumidor Final</option>`;
+    function ejecutarFiltroCliente() {
+        const busqueda = document.getElementById("input-busc-cliente").value.toLowerCase();
+        const select = document.getElementById("sel-cliente");
+        
+        // Limpiamos opciones
+        select.innerHTML = '<option value="">-- Consumidor Final --</option>';
         
         clientes.forEach((c, i) => {
-            if(c.nombre.toLowerCase().includes(filter)) {
-                options += `<option value="${i}">${c.nombre}</option>`;
+            if (c.nombre.toLowerCase().includes(busqueda)) {
+                const opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
             }
         });
-        sel.innerHTML = options;
-        // Resetear cliSel para forzar nueva selección del usuario sobre el filtrado
-        cliSel = null;
+    }
+
+    function seleccionarClienteDeLista() {
+        const select = document.getElementById("sel-cliente");
+        if(select.value === "") {
+            cliSel = null;
+        } else {
+            cliSel = clientes[select.value];
+        }
     }
 
     function filtrarP(v) { document.querySelectorAll(".card-prod").forEach(c => c.style.display = c.getAttribute("data-nombre").toLowerCase().includes(v.toLowerCase()) ? "block" : "none"); }
@@ -283,10 +272,9 @@
         let p = productos[idx];
         if(p.stock <= 0) { alert("¡Sin existencias!"); return; }
         let cant = prompt(`¿Cuántas unidades de ${p.nombre}?`, "1");
-        if(cant === null || cant === "" || isNaN(cant)) return;
+        if(!cant || isNaN(cant) || cant <= 0) return;
         cant = parseInt(cant);
         if(cant > p.stock) { alert(`Error: Solo tienes ${p.stock}.`); return; }
-        if(cant <= 0) return;
         
         carrito.push({ idx: idx, nombre: p.nombre, precioUnidad: p.precio, costeUnidad: p.coste || 0, cantidad: cant, subtotal: p.precio * cant });
         actualizarCarrito();
@@ -294,14 +282,14 @@
 
     function actualizarCarrito() {
       let total = 0;
-      let html = "<div class='lista'><b>🛒 Detalle de Venta:</b>";
+      let html = "<div class='lista'><b>🛒 Detalle:</b>";
       carrito.forEach((it, i) => {
         total += it.subtotal;
         html += `<div class='item-pedido'>${it.cantidad}x ${it.nombre} <span>$${it.subtotal.toLocaleString()} <button onclick='carrito.splice(${i},1);actualizarCarrito()' style='background:red'>x</button></span></div>`;
       });
       if(carrito.length > 0) {
         html += `<hr><b>TOTAL: $${total.toLocaleString()}</b>
-          <button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR Y DESCONTAR STOCK</button>
+          <button class='btn-venta' onclick='finalizarVenta(${total}, true)'>💰 COBRAR Y DESCONTAR</button>
           <button onclick='finalizarVenta(${total}, false)' style='background:var(--blue); width:95%; display:block; margin:5px auto; padding:12px; color:white; border-radius:8px;'>📄 SOLO COTIZAR</button>`;
       }
       document.getElementById("lista-carrito").innerHTML = html;
@@ -316,9 +304,10 @@
         });
         historialVentas.push({ fecha: new Date().toLocaleString(), total: total, utilidad: utilidadVenta, cliente: cliSel ? cliSel.nombre : "Final" });
       }
+      
       let titulo = esVenta ? "RECIBO" : "COTIZACIÓN";
-      let itemsH = carrito.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.cantidad} ${i.nombre}</span><span>$${i.subtotal}</span></div>`).join("");
-      document.getElementById("ticket-contenido").innerHTML = `<div style="text-align:center"><h2>LA BODEGUITA</h2><h3>${titulo}</h3></div><p style="font-size:10px">${cliSel?cliSel.nombre:'C. Final'}<br>${new Date().toLocaleString()}</p><hr>${itemsH}<hr><h3 style="text-align:right">TOTAL: $${total}</h3>`;
+      document.getElementById("ticket-contenido").innerHTML = `<div style="text-align:center"><h2>LA BODEGUITA</h2><h3>${titulo}</h3></div><p>${cliSel?cliSel.nombre:'C. Final'}<br>${new Date().toLocaleString()}</p><hr>` + carrito.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.cantidad} ${i.nombre}</span><span>$${i.subtotal}</span></div>`).join("") + `<hr><h3 style="text-align:right">TOTAL: $${total}</h3>`;
+      
       document.getElementById("ticket-wrapper").style.display = "flex";
       setTimeout(() => {
         html2canvas(document.getElementById("ticket-visual")).then(canvas => {
@@ -329,32 +318,16 @@
     }
 
     function verConfig() {
-      let totalV = 0;
-      let totalU = 0;
+      let tV = 0, tU = 0;
       let html = "<h3>📊 Reporte</h3><div class='lista'>";
-      historialVentas.forEach(v => { 
-          totalV += v.total; 
-          totalU += (v.utilidad || 0);
-          html += `<div style='font-size:11px;border-bottom:1px solid #eee; padding:5px 0'>
-                    ${v.fecha} - ${v.cliente} <br> 
-                    <b>Venta: $${v.total.toLocaleString()}</b> | 
-                    <span style="color:var(--success)">Utilidad: $${(v.utilidad || 0).toLocaleString()}</span>
-                  </div>`; 
-      });
-      html += `<div style="background:#eee; padding:10px; border-radius:10px; margin-top:10px">
-                <h4>VENTAS: $${totalV.toLocaleString()}</h4>
-                <h4 style="color:var(--success)">GANANCIA REAL: $${totalU.toLocaleString()}</h4>
-              </div>
-              <button onclick="exportarDatos()" style="background:#2d3436;width:100%; margin-top:10px">📥 Exportar Backup (JSON)</button>
-              <br><br><input type="file" onchange="importarDatos(event)"><br>
-              <button onclick="if(confirm('¿Borrar historial?')){historialVentas=[];guardar();verConfig()}" style="background:red;width:100%; margin-top:10px">Limpiar Reporte</button></div>`;
+      historialVentas.forEach(v => { tV += v.total; tU += (v.utilidad || 0); });
+      html += `<h4>TOTAL VENTAS: $${tV.toLocaleString()}</h4><h4 style="color:var(--success)">UTILIDAD: $${tU.toLocaleString()}</h4><hr>
+              <button onclick="exportarDatos()" style="background:#2d3436;width:100%">📥 Descargar Backup (JSON)</button>
+              <br><br><label>Restaurar Backup:</label><input type="file" onchange="importarDatos(event)">
+              <button onclick="if(confirm('¿Borrar?')){historialVentas=[];guardar();verConfig()}" style="background:red;width:100%;margin-top:10px">Limpiar Historial</button></div>`;
       document.getElementById("app").innerHTML = html;
     }
 
-    function exportarDatos() { const blob = new Blob([JSON.stringify({productos, clientes, categorias, historialVentas})], {type:"application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Bodeguita_Backup.json`; a.click(); ultimoBackup = Date.now(); localStorage.setItem("lb_last_backup", ultimoBackup);verificarAlertaBackup(); }
-    function importarDatos(e) { const reader = new FileReader(); reader.onload = (ev) => { const d = JSON.parse(ev.target.result); productos = d.productos; clientes = d.clientes; categorias = d.categorias; historialVentas = d.historialVentas; guardar(); location.reload(); }; reader.readAsText(e.target.files[0]); }
-
-    // Inicializar comprobando la licencia
     chequearAcceso();
   </script> 
 </body> 
