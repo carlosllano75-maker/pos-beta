@@ -278,7 +278,65 @@
     function verConfig() {
       let tV = 0, tU = 0;
       historialVentas.forEach(v => { tV += v.total; tU += (v.utilidad || 0); });
-      document.getElementById("app").innerHTML = `<h3>📊 Reporte</h3><div class='lista'><h4>VENTAS: $${tV.toLocaleString()}</h4><h4 style="color:var(--success)">GANANCIA: $${tU.toLocaleString()}</h4><hr><button onclick="exportarDatos()" style="background:#2d3436;width:100%">📥 Exportar Backup</button><br><br><input type="file" onchange="importarDatos(event)"></div>`;
+      
+      let html = `
+        <div id="area-reporte" style="background:white; padding:15px; border-radius:10px;">
+            <h3>📊 Reporte de Ventas</h3>
+            <p><b>Fecha:</b> ${new Date().toLocaleDateString()}</p>
+            <div class='lista'>
+                <h4>TOTAL VENTAS: $${tV.toLocaleString()}</h4>
+                <h4 style="color:var(--success)">GANANCIA ESTIMADA: $${tU.toLocaleString()}</h4>
+            </div>
+            <hr>
+            <h4>Detalle de Operaciones:</h4>
+            <div style="max-height: 200px; overflow-y: auto; font-size: 14px;">
+                ${historialVentas.map(v => `<div style="border-bottom:1px solid #eee; padding:5px 0;">[${v.fecha}] - ${v.cliente} - <b>$${v.total.toLocaleString()}</b></div>`).join("")}
+                ${historialVentas.length === 0 ? '<p>No hay ventas registradas aún.</p>' : ''}
+            </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+            <button onclick="imprimirReporte()" style="background:#2980b9;">🖨️ Imprimir Reporte</button>
+            <button onclick="limpiarReporte()" style="background:var(--danger);">🗑️ Limpiar Día</button>
+        </div>
+
+        <hr style="margin-top:20px; margin-bottom:20px;">
+        <div class='lista'>
+            <h4>Manejo de Datos</h4>
+            <button onclick="exportarDatos()" style="background:#2d3436;width:100%; margin-bottom:10px;">📥 Exportar Backup</button>
+            <input type="file" onchange="importarDatos(event)" style="width:100%; font-size:12px;">
+        </div>
+      `;
+      document.getElementById("app").innerHTML = html;
+    }
+
+    function imprimirReporte() {
+        let contenido = document.getElementById("area-reporte").innerHTML;
+        let ventanaImpresion = window.open('', '', 'height=600,width=400');
+        ventanaImpresion.document.write('<html><head><title>Reporte LA BODEGUITA</title>');
+        ventanaImpresion.document.write('<style>body{font-family:sans-serif; padding:20px;} h3, h4{margin:5px 0;} hr{border:1px solid #ccc;}</style>');
+        ventanaImpresion.document.write('</head><body>');
+        ventanaImpresion.document.write('<div style="text-align:center; margin-bottom:20px;">');
+        ventanaImpresion.document.write('<img src="' + LOGO_BASE64 + '" style="width:100px;">');
+        ventanaImpresion.document.write('<h2>REPORTE DIARIO</h2></div>');
+        ventanaImpresion.document.write(contenido);
+        ventanaImpresion.document.write('</body></html>');
+        ventanaImpresion.document.close();
+        ventanaImpresion.focus();
+        
+        setTimeout(function(){
+            ventanaImpresion.print();
+            ventanaImpresion.close();
+        }, 500);
+    }
+
+    function limpiarReporte() {
+        if(confirm("⚠️ ¿Estás seguro de que deseas borrar TODAS las ventas y ganancias registradas? Esto iniciará un día nuevo en cero y no se puede deshacer.")) {
+            historialVentas = []; 
+            guardar(); 
+            verConfig(); 
+            alert("El reporte ha sido limpiado. Comienza un nuevo día.");
+        }
     }
 
     function exportarDatos() { 
@@ -300,4 +358,37 @@
     chequearAcceso();
   </script> 
 </body> 
-</html
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
