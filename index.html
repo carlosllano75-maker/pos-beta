@@ -123,13 +123,27 @@
     function chequearAcceso() {
       let activa = localStorage.getItem("lb_licencia_activa");
       let vencimiento = parseInt(localStorage.getItem("lb_fecha_vencimiento"));
-      if(activa === "true" && vencimiento && new Date().getTime() < vencimiento) {
+      let ahora = new Date().getTime();
+
+      if(activa === "true" && vencimiento && ahora < vencimiento) {
         document.getElementById("bloqueo").style.display = "none";
         document.getElementById("contenido-app").style.display = "block";
-        verificarAlertaBackup(); verInventario();
+        
+        // --- LÓGICA DE AVISO DE VENCIMIENTO ---
+        let msRestantes = vencimiento - ahora;
+        let diasRestantes = Math.ceil(msRestantes / (1000 * 60 * 60 * 24));
+
+        if(diasRestantes <= 3) {
+          alert("⚠️ AVISO DE SUSCRIPCIÓN:\n\nEl sistema vencerá en " + diasRestantes + " día(s). \nContacte al administrador para renovar su licencia.");
+        }
+        // ---------------------------------------
+
+        verificarAlertaBackup(); 
+        verInventario();
       } else {
         document.getElementById("bloqueo").style.display = "flex";
         document.getElementById("contenido-app").style.display = "none";
+        if(activa === "true") alert("❌ LICENCIA VENCIDA. Contacte soporte.");
       }
     }
 
