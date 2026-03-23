@@ -1,10 +1,10 @@
 {
-  "name": "Casa Gourmet POS",
-  "short_name": "Casa Gourmet",
+  "name": "La Bodeguita PRO",
+  "short_name": "Bodeguita",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0b0b0b",
-  "theme_color": "#d4af37",
+  "background_color": "#f4f7f6",
+  "theme_color": "#2c3e50",
   "orientation": "any",
   "icons": [
     {
