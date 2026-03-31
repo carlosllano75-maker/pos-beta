@@ -1,6 +1,6 @@
 {
-  "name": "La Bodeguita PRO",
-  "short_name": "Bodeguita",
+  "name": "La Bodega PRO",
+  "short_name": "Bodega",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f7f6",
