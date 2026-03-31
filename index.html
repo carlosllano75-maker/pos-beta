@@ -3,7 +3,7 @@
 <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> 
-  <title>LA BODEGUITA PRO – Multi-Venta</title>
+  <title>LA BODEGA PRO – Multi-Venta</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2c3e50">
   
@@ -71,7 +71,7 @@
   </div>
 
   <div id="contenido-app" style="display:none">
-    <header><b>🛠️ LA BODEGUITA PRO</b></header> 
+    <header><b>🛠️ LA BODEGA PRO</b></header> 
     <div id="alerta-backup" class="alerta-backup" onclick="exportarDatos()">⚠️ CLICK AQUÍ PARA REALIZAR BACKUP (RECOMENDADO)</div>
     <div class="menu-superior">
       <button onclick="verInventario()">📦 Stock</button>
@@ -88,7 +88,7 @@
     const LOGO_BASE64 = "";
     document.getElementById('logo-login').src = LOGO_BASE64;
 
-    const CLAVE_MAESTRA = "BODEGUITA2024";
+    const CLAVE_MAESTRA = "BODEGA2024";
     const DIAS_LICENCIA = 7;
     
     // ---> NUEVAS VARIABLES PARA EL STOCK <---
@@ -156,7 +156,7 @@
         const ws = XLSX.utils.json_to_sheet(productos.map(p => ({ NOMBRE: p.nombre, COSTE: p.coste || 0, PRECIO: p.precio, CATEGORIA: p.cat, STOCK: p.stock, MINIMO: p.minimo })));
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-        XLSX.writeFile(wb, "Inventario_Bodeguita.xlsx");
+        XLSX.writeFile(wb, "Inventario_Bodega.xlsx");
     }
 
     function importarExcel(e) {
@@ -277,7 +277,7 @@
       document.getElementById("ticket-contenido").innerHTML = `
         <div style="text-align:center; margin-bottom:15px;">
           <img src="${LOGO_BASE64}" style="width:140px; margin-bottom:10px;">
-          <br><b style="font-size:32px;">LA BODEGUITA</b><br>
+          <br><b style="font-size:32px;">LA BODEGA</b><br>
           <span style="font-size:24px;">${titulo}</span>
         </div>
         <div style="font-size:20px; margin-bottom:10px; border-bottom:3px solid #000; padding-bottom:5px;">
@@ -346,7 +346,7 @@
     function imprimirReporte() {
         let contenido = document.getElementById("area-reporte").innerHTML;
         let ventanaImpresion = window.open('', '', 'height=600,width=400');
-        ventanaImpresion.document.write('<html><head><title>Reporte LA BODEGUITA</title>');
+        ventanaImpresion.document.write('<html><head><title>Reporte LA BODEGA</title>');
         ventanaImpresion.document.write('<style>body{font-family:sans-serif; padding:20px;} h3, h4{margin:5px 0;} hr{border:1px solid #ccc;}</style>');
         ventanaImpresion.document.write('</head><body>');
         ventanaImpresion.document.write('<div style="text-align:center; margin-bottom:20px;">');
